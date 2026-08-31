@@ -206,19 +206,19 @@
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#080b1a]">
         
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center">
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover scale-[1.05]"></video>
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover"></video>
           <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
         </div>
 
         <div id="forest-wrapper" class="absolute inset-0 w-full h-full">
-          <img id="forest-bg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_1.png" class="absolute inset-0 w-full h-full object-cover scale-[1.05] hero-img-load" style="animation-delay: 0.1s;" />
-          <img id="forest-mg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_2.png" class="absolute inset-0 w-full h-full object-cover scale-[1.15] opacity-90 blur-[2px] hero-img-load" style="animation-delay: 0.3s;" />
+          <img id="forest-bg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_1.png" class="absolute inset-0 w-full h-full object-cover hero-img-load" style="animation-delay: 0.1s;" />
+          <img id="forest-mg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_2.png" class="absolute inset-0 w-full h-full object-cover opacity-90 blur-[2px] hero-img-load" style="animation-delay: 0.3s;" />
           
           <div id="hero-text-initial" class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-20 pointer-events-none pb-[15%] md:pb-[25%]">
-            <h1 class="text-[25vw] md:text-[13vw] leading-none font-black tracking-tighter text-transparent stroke-text drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] hero-img-load" style="animation-delay: 0.5s; animation-fill-mode: both;">欢迎进入</h1>
+            <h1 class="text-[22vw] md:text-[13vw] leading-none font-black tracking-tighter whitespace-nowrap text-transparent stroke-text drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] hero-img-load" style="animation-delay: 0.5s; animation-fill-mode: both;">欢迎进入</h1>
           </div>
 
-          <img id="forest-fg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_3.png" class="absolute -bottom-[20%] left-0 w-full object-cover scale-[1.2] origin-bottom z-30 pointer-events-none hero-img-load" style="animation-delay: 0.4s; animation-fill-mode: both;" />
+          <img id="forest-fg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_3.png" class="absolute -bottom-[20%] left-0 w-full object-cover origin-bottom z-30 pointer-events-none hero-img-load" style="animation-delay: 0.4s; animation-fill-mode: both;" />
         </div>
 
         <div id="hero-text-final" class="absolute z-40 flex flex-col items-center justify-center text-center px-6 text-white opacity-0 pointer-events-none w-full max-w-full mx-auto gap-4 md:gap-6">
@@ -368,7 +368,6 @@
       { name: 'PPT渲染', icon: 'monitor-play' }
     ];
 
-    // 核心排查：已统一修改为安全的英文字母和标准小写扩展名，并添加了相对路径 ./ 前缀（在渲染时）
     const CORE_COMPETENCIES = [
       { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
       { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
@@ -449,7 +448,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       
-      // 极客自定义光标逻辑与Hover事件绑定
       const cursorDot = document.getElementById('cursor-dot');
       const cursorRing = document.getElementById('cursor-ring');
       
@@ -462,7 +460,6 @@
           cursorRing.style.top = `${e.clientY}px`;
         });
 
-        // 委托机制：在 document 上监听 hover，动态添加外围扩大光晕
         document.addEventListener('mouseover', (e) => {
           const target = e.target.closest('a, button, input, .cursor-pointer, .hover-float-card');
           if (target && cursorRing) {
@@ -489,17 +486,24 @@
       const competenciesHTML = CORE_COMPETENCIES.map((comp, i) => {
         const hasImage = !!comp.image;
         const cardClass = hasImage ? 'hover-float-card' : '';
-        // 核心排查修复：加入 encodeURIComponent 防止图片带有特殊字符在 GitHub Pages 上 404
         const safeImageUrl = hasImage ? `./${encodeURIComponent(comp.image)}` : '';
         
+        // 桌面端的悬浮隐藏图（仅电脑可见）
         const floatImgHTML = hasImage ? `
           <img
             src="${safeImageUrl}"
             alt="${comp.title}"
             class="floating-image hidden md:block absolute top-0 left-0 w-[300px] z-[9999] pointer-events-none opacity-0 rounded-xl shadow-2xl"
             style="transition: transform 0.15s ease-out, opacity 0.2s ease-in-out;"
-            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwIi8+PC9zdmc+'"
+            onerror="this.style.display='none'"
           />
+        ` : '';
+
+        // 修复点3：移动端的内嵌固定图（仅手机可见，完美解决照片不刷新的痛点）
+        const mobileImgHTML = hasImage ? `
+          <div class="md:hidden w-full mb-6 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+             <img src="${safeImageUrl}" alt="${comp.title}" class="w-full h-auto object-cover" onerror="this.style.display='none'"/>
+          </div>
         ` : '';
 
         return `
@@ -511,8 +515,9 @@
           
           ${floatImgHTML}
           
-          <div class="relative z-10 flex flex-col h-full gap-4 md:gap-6 pointer-events-none">
-            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#00f0ff] group-hover:scale-110 transition-transform duration-500">
+          <div class="relative z-10 flex flex-col h-full pointer-events-none">
+            ${mobileImgHTML}
+            <div class="w-12 h-12 md:w-14 md:h-14 mb-4 md:mb-6 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#00f0ff] group-hover:scale-110 transition-transform duration-500">
                 <i data-lucide="${comp.icon}" class="w-6 h-6 md:w-7 md:h-7"></i>
             </div>
             <div>
@@ -571,7 +576,6 @@
           batch.images.forEach((imgSrc, imgIndex) => {
             const mlClass = imgIndex === 0 ? '' : 'md:-ml-[6.5rem]';
             const rotateClass = imgIndex % 2 === 0 ? 'md:-rotate-2' : 'md:rotate-2';
-            // 核心排查修复：加入 encodeURIComponent 处理包含空格、括号和中文的证书文件名
             const safeCertUrl = `./images/${encodeURIComponent(imgSrc)}`;
             
             certsHTML += `
@@ -596,12 +600,12 @@
 
       const experienceHTML = EXPERIENCES.map((exp, i) => `
         <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border-l-2 md:border-l border-white/10 md:border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default ${i % 2 !== 0 ? 'reveal-delay-1' : ''}">
-          <div class="absolute -left-2 top-10 md:hidden w-4 h-4 rounded-full bg-[#080b1a] border-2 border-[#00f0ff] z-20"></div>
+          <div class="absolute -left-[5px] md:left-0 top-10 md:top-auto md:hidden w-3 h-3 rounded-full bg-[#080b1a] border-2 border-[#00f0ff] z-20"></div>
           
           <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
             <div class="absolute -top-12 -right-12 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[#00f0ff]/10 to-[#00ff9d]/10 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
           </div>
-          <div class="relative z-10 md:grid md:grid-cols-12 md:gap-8 items-start pl-4 md:pl-0">
+          <div class="relative z-10 md:grid md:grid-cols-12 md:gap-8 items-start pl-2 md:pl-0">
             <div class="md:col-span-4 mb-5 md:mb-0">
               <div class="hidden md:inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#1a1f3c] border border-white/10 text-[#00f0ff] mb-6 group-hover:scale-110 transition-transform duration-500">
                   <i data-lucide="folder-git-2" class="w-6 h-6"></i>
@@ -736,16 +740,23 @@
         targetY += (mouseY - targetY) * 0.05;
 
         if (window.scrollY < window.innerHeight * 1.5) {
-          if(forestBg) forestBg.style.transform = `translate(${targetX * 10}px, ${targetY * 10}px) scale(1.05)`;
-          if(forestMg) forestMg.style.transform = `translate(${targetX * 25}px, ${targetY * 25}px) scale(1.15)`;
-          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30}px, ${targetY * 30}px)`;
-          if(forestFg) forestFg.style.transform = `translate(${targetX * 60}px, ${targetY * 60}px) scale(1.2)`;
+          // 修复点2：移动端缩小放大倍数，减弱滑动幅度，避免人物或树木变得大到吓人
+          const isMobile = window.innerWidth < 768;
+          const scaleBg = isMobile ? 1.02 : 1.05;
+          const scaleMg = isMobile ? 1.05 : 1.15;
+          const scaleFg = isMobile ? 1.05 : 1.2;
+          const moveDamp = isMobile ? 0.3 : 1; 
+
+          if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
+          if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
+          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
+          if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
           
           if (sciFiVideo && isVideoEnded) {
             videoWeight += (1 - videoWeight) * 0.03; 
-            const curX = targetX * 15 * videoWeight;
-            const curY = targetY * 15 * videoWeight;
-            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(1.05)`;
+            const curX = targetX * 15 * videoWeight * moveDamp;
+            const curY = targetY * 15 * videoWeight * moveDamp;
+            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
           }
         }
         requestAnimationFrame(animateParallax);
