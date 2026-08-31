@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>董奕铭的主页 - 复合型极客人才</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+    
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #080b1a;
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-attachment: fixed;
+      color: white;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 极客自定义光标：全局强制隐藏默认鼠标 */
+    @media (hover: hover) and (pointer: fine) {
+      * {
+        cursor: none !important;
+      }
+    }
+
+    /* 光标智能变色系统 */
+    body.hero-mode #cursor-dot {
+      background-color: #ffffff !important;
+    }
+    body.hero-mode #cursor-ring {
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+    #cursor-ring.cursor-hover {
+      width: 48px !important;
+      height: 48px !important;
+      background-color: rgba(0, 240, 255, 0.1) !important;
+      border-color: rgba(0, 240, 255, 0.8) !important;
+    }
+    body.hero-mode #cursor-ring.cursor-hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .sci-fi-font {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.04em;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.4), 0 0 40px rgba(176, 38, 255, 0.2), 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #080b1a; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+    
+    .stroke-text { 
+      -webkit-text-stroke: 2px rgba(255, 255, 255, 0.7); 
+      color: transparent; 
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: max-content;
+      animation: marquee 40s linear infinite;
+    }
+
+    .cert-item {
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @media (min-width: 768px) {
+      .cert-item:hover {
+        transform: scale(1.1) translateY(-30px) rotate(0deg) !important;
+        z-index: 50 !important;
+      }
+    }
+    @media (max-width: 767px) {
+      .cert-item:active {
+        transform: scale(1.05);
+      }
+    }
+
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    #mobile-menu {
+      transition: height 0.3s ease, opacity 0.3s ease;
+    }
+
+    @keyframes heroFadeIn {
+      from { opacity: 0; filter: blur(15px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+    .hero-img-load {
+      animation: heroFadeIn 1.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .nav-active {
+      color: white !important;
+      text-shadow: 0 0 10px rgba(0,240,255,0.5);
+    }
+    .nav-active span {
+      width: 100% !important;
+    }
+    
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.15s; }
+  </style>
+</head>
+<body>
+
+  <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#00f0ff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
+  <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#00f0ff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
+
+  <canvas id="ambient-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-[-1]"></canvas>
+
+  <nav id="navbar" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl transition-all duration-300 rounded-full bg-white/10 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.15)] border border-white/20 py-3 md:py-4">
+    <div class="px-5 md:px-6 flex items-center justify-between">
+      <div class="flex items-center gap-2 cursor-pointer">
+        <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-[#00f0ff] to-[#00ff9d] flex items-center justify-center">
+          <i data-lucide="cpu" class="text-white w-4 h-4"></i>
+        </div>
+        <span class="font-black text-lg md:text-xl tracking-tighter text-white">Dong Yiming</span>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="#about" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          关于我<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="#skills" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          核心技术栈<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="#projects" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          实战项目<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="#work" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          我的证书<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="#specialties" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          个人特长<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        <a href="#contact" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
+          联系我<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
+        </a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-3">
+        <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          下载 PDF
+        </a>
+        <button onclick="window.print()" class="flex items-center gap-2 justify-center px-4 py-2.5 bg-white/10 text-white border border-white/20 rounded-full text-sm font-bold hover:bg-white/20 active:scale-95 transition-all cursor-pointer">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <button id="menu-toggle" class="md:hidden text-white p-2" aria-label="Toggle Menu">
+        <i id="menu-icon" data-lucide="menu"></i>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="md:hidden overflow-hidden bg-[#1a1f3c]/95 backdrop-blur-2xl border-white/10 rounded-b-3xl h-0 opacity-0 border-t-0">
+      <div class="flex flex-col p-6 gap-4">
+        <a href="#about" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">关于我</a>
+        <a href="#skills" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">核心技术栈</a>
+        <a href="#projects" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">实战项目</a>
+        <a href="#work" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">我的证书</a>
+        <a href="#specialties" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">个人特长</a>
+        <a href="#contact" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">联系我</a>
+        
+        <div class="mt-4 flex flex-col gap-3">
+          <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-lg active:scale-95 transition-transform cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            下载 PDF 简历
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="hero-container" class="relative h-[300vh] bg-[#080b1a]">
+      <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#080b1a]">
+        
+        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center">
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover scale-[1.05]"></video>
+          <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
+        </div>
+
+        <div id="forest-wrapper" class="absolute inset-0 w-full h-full">
+          <img id="forest-bg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_1.png" class="absolute inset-0 w-full h-full object-cover scale-[1.05] hero-img-load" style="animation-delay: 0.1s;" />
+          <img id="forest-mg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_2.png" class="absolute inset-0 w-full h-full object-cover scale-[1.15] opacity-90 blur-[2px] hero-img-load" style="animation-delay: 0.3s;" />
+          
+          <div id="hero-text-initial" class="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-20 pointer-events-none pb-[15%] md:pb-[25%]">
+            <h1 class="text-[25vw] md:text-[13vw] leading-none font-black tracking-tighter text-transparent stroke-text drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] hero-img-load" style="animation-delay: 0.5s; animation-fill-mode: both;">欢迎进入</h1>
+          </div>
+
+          <img id="forest-fg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_3.png" class="absolute -bottom-[20%] left-0 w-full object-cover scale-[1.2] origin-bottom z-30 pointer-events-none hero-img-load" style="animation-delay: 0.4s; animation-fill-mode: both;" />
+        </div>
+
+        <div id="hero-text-final" class="absolute z-40 flex flex-col items-center justify-center text-center px-6 text-white opacity-0 pointer-events-none w-full max-w-full mx-auto gap-4 md:gap-6">
+          <h1 class="text-4xl sm:text-6xl md:text-[9vw] leading-tight md:leading-none font-extrabold tracking-tighter sci-fi-font text-[#e0ffff]">
+            董奕铭的主页
+          </h1>
+          <h2 class="text-base sm:text-xl md:text-[2.5vw] font-medium text-gray-300 md:text-white tracking-wide">
+            重庆邮电大学 · 通信工程本科
+          </h2>
+          <div class="inline-flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 mt-2 md:mt-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transform hover:scale-105 transition-transform duration-300">
+            <span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#00f0ff] animate-pulse shrink-0"></span>
+            <span class="text-xs sm:text-sm md:text-lg font-bold tracking-widest text-gray-200 leading-none mt-0.5">
+              <span class="text-gray-400 mr-1 md:mr-2">求职方向：</span>研发 / AIGC / 管培生
+            </span>
+          </div>
+        </div>
+
+        <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none">
+          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2">向下滚动</span>
+          <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5"></i>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
+        <p class="text-gray-400 font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
+      </div>
+      <div class="relative w-full flex overflow-hidden">
+        <div class="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
+        <div id="skills-marquee-container" class="animate-marquee"></div>
+      </div>
+    </section>
+
+    <section id="about" class="py-16 md:py-24 relative overflow-hidden bg-transparent">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#00f0ff]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none max-w-[100vw]"></div>
+      <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
+          <div class="cursor-default">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-[1.3] md:leading-[1.2] reveal">
+              具备 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">“极客精神”</span> <br/>
+              与 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff9d] to-[#00f0ff]">“科研韧性”</span> <br class="md:hidden"/>的复合型人才。
+            </h2>
+          </div>
+          <div class="flex flex-col gap-8 cursor-default">
+            <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed reveal text-justify">
+              在学术探索上，拥有省市级大赛获奖经历及名校研学背景；在技术应用上，是 AIGC 领域的早期实践者，能够打破常规，利用前沿 AI 工具实现全链路内容开发与效率破局。兼具出色的动手实践能力与旺盛的求知欲。
+            </p>
+            <div class="grid grid-cols-2 gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/10">
+              <div class="reveal">
+                <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">3<span class="text-[#00f0ff]">+</span></h4>
+                <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">省市级奖项</p>
+              </div>
+              <div class="reveal reveal-delay-1">
+                <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">2<span class="text-[#00ff9d]">+</span></h4>
+                <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">顶尖高校研学</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+      <div class="mb-10 md:mb-16 max-w-3xl cursor-default">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-tight reveal">
+          跨界整合的 <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">全链路技术壁垒。</span>
+        </h2>
+      </div>
+      <div id="core-competencies-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </section>
+
+    <section id="work" class="py-12 md:py-16 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 overflow-hidden bg-transparent">
+      <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 md:mb-10 gap-4 reveal cursor-default">
+        <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white">我的证书</h2>
+      </div>
+      <div id="certificates-container" class="flex flex-col space-y-10 md:space-y-12"></div>
+    </section>
+
+    <section id="projects" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+      <div class="mb-10 md:mb-16 cursor-default">
+        <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">核心项目与科研实践</h2>
+      </div>
+      <div class="flex flex-col gap-6 md:gap-8" id="experience-list-container"></div>
+    </section>
+    
+    <section id="specialties" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+       <div class="mb-10 md:mb-16 cursor-default">
+         <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">个人特长与兴趣</h2>
+       </div>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 border-t border-white/10 pt-10 md:pt-16">
+          <div class="group reveal cursor-default">
+             <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00f0ff]/20 transition-colors">
+               <i data-lucide="wrench" class="text-[#00f0ff]"></i>
+             </div>
+             <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">硬件/机械工程实操</h3>
+             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
+          </div>
+          <div class="group reveal reveal-delay-1 cursor-default">
+             <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00ff9d]/20 transition-colors">
+               <i data-lucide="target" class="text-[#00ff9d]"></i>
+             </div>
+             <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">竞技体育精神</h3>
+             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
+          </div>
+       </div>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="pt-24 md:pt-32 pb-8 border-t border-white/10 bg-transparent relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
+      <div class="flex flex-col items-center text-center mb-16 md:mb-20 cursor-default">
+        <h2 class="text-4xl sm:text-5xl md:text-[6rem] font-black tracking-tighter leading-tight mb-8 reveal">
+          开启 <span class="italic font-serif font-light text-gray-400">无限可能。</span>
+        </h2>
+        
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 reveal reveal-delay-1 w-full max-w-sm sm:max-w-none mx-auto justify-center">
+          <button id="copy-email-btn" data-copy-val="dymdawang@outlook.com" data-original-text="我的邮箱" data-icon="mail" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-full text-base font-bold shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group cursor-pointer border-none outline-none">
+            <i data-lucide="mail" class="w-5 h-5"></i>
+            <span>我的邮箱</span>
+          </button>
+          
+          <button id="copy-phone-btn" data-copy-val="15967720688" data-original-text="我的电话" data-icon="phone" class="w-full sm:w-auto px-8 py-4 bg-white/10 text-white rounded-full text-base font-bold border border-white/20 hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer outline-none">
+            <i data-lucide="phone" class="w-5 h-5"></i>
+            <span>我的电话</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-gray-500 pt-8 border-t border-white/10 gap-4 cursor-default text-center">
+        <p>来自 浙江</p>
+        <p>&copy; 2026 Dong Yiming. 保留所有权利。</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SKILLS = [
+      { name: 'Python', icon: 'code' },
+      { name: 'AIGC', icon: 'sparkles' },
+      { name: 'Prompt Engineering', icon: 'terminal' },
+      { name: 'Data Analysis', icon: 'bar-chart-2' },
+      { name: '硬件调试', icon: 'cpu' },
+      { name: '跨界研究', icon: 'microscope' },
+      { name: 'PPT渲染', icon: 'monitor-play' }
+    ];
+
+    // 核心排查：已统一修改为安全的英文字母和标准小写扩展名，并添加了相对路径 ./ 前缀（在渲染时）
+    const CORE_COMPETENCIES = [
+      { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
+      { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
+      { title: '科研与数据分析', desc: '具备独立展开个人科研实验的经验，能熟练掌握运用 AI 进行数据分析，撰写高质量学术论文及调研报告。', icon: 'line-chart' },
+      { title: '多项 AI 认证', desc: '拿下过多项权威 AI 证书，证明了在人工智能领域的系统学习能力与前沿技术的跟进速度。', icon: 'award' }
+    ];
+
+    const EXPERIENCES = [
+      {
+        title: '基于AIGC引擎的互动游戏及多媒体内容开发',
+        role: '独立开发者 | 个人实战项目',
+        bullets: [
+          '针对快速构建轻量级互动娱乐内容的需求，突破网络限制获取前沿开源大模型资源，搭建 AI 辅助开发环境。',
+          '利用 AI 大模型生成核心业务逻辑与基础代码；通过文生图、文生音大模型独立完成美术素材及背景音乐渲染。',
+          '结合 AI 排版与内容提炼工具，高效制作项目路演 PPT 及汇报材料。',
+          '成功跑通并落地可交互的小游戏原型，沉淀了一套高效的“AI+多媒体开发”标准 SOP。'
+        ]
+      },
+      {
+        title: '“温州市青少年科技创新大赛” 创新科研项目',
+        role: '核心研究员 | 荣获三等奖',
+        bullets: [
+          '聚焦生命科学，主导创新项目的前线研究与方案设计。',
+          '独立收集并清洗关键数据，通过逻辑推理与数据分析验证假设，辅助撰写专业学术论文。',
+          '斩获大赛（论文项目）三等奖，验证了扎实的科研素养与独立探索精神。'
+        ]
+      },
+      {
+        title: '浙江大学、复旦大学研学项目',
+        role: '核心成员 | 跨学科探索',
+        bullets: [
+          '在教授带领下完成“国旗升降装置”、“水火箭”等实验，深入了解前沿科技发展趋势。',
+          '与小组共同完成跨学科课题调研，负责核心数据的汇总与最终 PPT 路演展示，获高度评价。',
+          '拓宽泛科技与通信领域视野，培养了顶层思维与跨团队协同沟通能力。'
+        ]
+      }
+    ];
+
+    const certificateBatches = [
+      {
+        title: "Datawhale 认证",
+        images: [
+          "254170-_zGdVfMRZUf01pCPJroNNw.png", "254170-97Ef9331wyQ8wfaSKpmNLw.png", 
+          "254170-fJAXJCzExKHTfJk7FO5A5g.png", "254170-IkMJM7QcH7wGR2Uvv3yPPQ.png", 
+          "254170-nsMZEmlaGoNIc-BLMxCMIw.png", "254170-sbGv5a8k4zU-oC9BbehhQg.png", 
+          "254170-ywDpUgUMn3B2WWI9OQbUEg.png"
+        ]
+      },
+      {
+        title: "阿里云 Apsara Clouder 专项技能认证",
+        images: [
+          "img_3c771a4e1b2138f01562957d5211de2c.png", "img_6f425f01d94ea23c188093f7b2ed1ddf.png", 
+          "img_9db90b74e92c100956e03f8a5c938737.png", "img_350ff38a72dfb953b2aac6df0d853189.png", 
+          "img_817a890a12bd6b085eaf6a7f7254b8f1.png", "img_b6373cd688bfe6f85d7f84614c19b63a.png", 
+          "img_c8d14932dd9cb70e41ab8ca5222f3787.png", "img_cc0cbe3dc5ef66ca7e6b3054879b0ef2.png"
+        ]
+      },
+      {
+        title: "北京深势科技有限公司 AI 系列认证",
+        images: ["certificate.png"]
+      },
+      {
+        title: "华为云微认证",
+        images: [
+          "屏幕截图 2026-08-18 194856.png", "20260816150002.png", "20260816151500.png", 
+          "20260816151501.png", "20260817034500.png", "20260817040000.png", 
+          "20260817040003.png"
+        ]
+      },
+      {
+        title: "AI大学堂认证",
+        images: [
+          "Ai大学认证证书 (1).png", "Ai大学认证证书 (2).png", 
+          "Ai大学认证证书 (3).png", "Ai大学认证证书.png"
+        ]
+      }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // 极客自定义光标逻辑与Hover事件绑定
+      const cursorDot = document.getElementById('cursor-dot');
+      const cursorRing = document.getElementById('cursor-ring');
+      
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        window.addEventListener('mousemove', (e) => {
+          if(!cursorDot || !cursorRing) return;
+          cursorDot.style.left = `${e.clientX}px`;
+          cursorDot.style.top = `${e.clientY}px`;
+          cursorRing.style.left = `${e.clientX}px`;
+          cursorRing.style.top = `${e.clientY}px`;
+        });
+
+        // 委托机制：在 document 上监听 hover，动态添加外围扩大光晕
+        document.addEventListener('mouseover', (e) => {
+          const target = e.target.closest('a, button, input, .cursor-pointer, .hover-float-card');
+          if (target && cursorRing) {
+            cursorRing.classList.add('cursor-hover');
+          }
+        });
+        
+        document.addEventListener('mouseout', (e) => {
+          const target = e.target.closest('a, button, input, .cursor-pointer, .hover-float-card');
+          if (target && cursorRing) {
+            cursorRing.classList.remove('cursor-hover');
+          }
+        });
+      }
+
+      const skillsHTML = [...SKILLS, ...SKILLS, ...SKILLS].map(skill => `
+        <div class="flex items-center gap-2 md:gap-3 px-6 md:px-8 opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
+          <i data-lucide="${skill.icon}" class="text-white w-5 h-5 md:w-6 md:h-6"></i>
+          <span class="text-lg md:text-xl font-bold tracking-tight text-white whitespace-nowrap">${skill.name}</span>
+        </div>
+      `).join('');
+      document.getElementById('skills-marquee-container').innerHTML = skillsHTML;
+
+      const competenciesHTML = CORE_COMPETENCIES.map((comp, i) => {
+        const hasImage = !!comp.image;
+        const cardClass = hasImage ? 'hover-float-card' : '';
+        // 核心排查修复：加入 encodeURIComponent 防止图片带有特殊字符在 GitHub Pages 上 404
+        const safeImageUrl = hasImage ? `./${encodeURIComponent(comp.image)}` : '';
+        
+        const floatImgHTML = hasImage ? `
+          <img
+            src="${safeImageUrl}"
+            alt="${comp.title}"
+            class="floating-image hidden md:block absolute top-0 left-0 w-[300px] z-[9999] pointer-events-none opacity-0 rounded-xl shadow-2xl"
+            style="transition: transform 0.15s ease-out, opacity 0.2s ease-in-out;"
+            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwIi8+PC9zdmc+'"
+          />
+        ` : '';
+
+        return `
+        <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer ${i % 2 !== 0 ? 'reveal-delay-1' : ''} ${cardClass}">
+          
+          <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+            <div class="absolute -top-12 -right-12 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[#00f0ff]/10 to-[#00ff9d]/10 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
+          </div>
+          
+          ${floatImgHTML}
+          
+          <div class="relative z-10 flex flex-col h-full gap-4 md:gap-6 pointer-events-none">
+            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#00f0ff] group-hover:scale-110 transition-transform duration-500">
+                <i data-lucide="${comp.icon}" class="w-6 h-6 md:w-7 md:h-7"></i>
+            </div>
+            <div>
+              <h3 class="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 tracking-tight">${comp.title}</h3>
+              <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base">${comp.desc}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+      document.getElementById('core-competencies-container').innerHTML = competenciesHTML;
+
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        const floatCards = document.querySelectorAll('.hover-float-card');
+        floatCards.forEach(card => {
+          const floatingImg = card.querySelector('.floating-image');
+          
+          if (floatingImg) {
+            card.addEventListener('mouseenter', () => {
+              floatingImg.style.opacity = '1';
+              card.style.zIndex = '999';
+            });
+
+            card.addEventListener('mousemove', (e) => {
+              const rect = card.getBoundingClientRect();
+              const x = e.clientX - rect.left + 5; 
+              const y = e.clientY - rect.top + 5;  
+
+              floatingImg.style.transform = `translate(${x}px, ${y}px) rotate(8deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+              floatingImg.style.opacity = '0';
+              card.style.zIndex = '';
+            });
+          }
+        });
+      }
+
+      let certsHTML = '';
+      certificateBatches.forEach((batch, batchIdx) => {
+          certsHTML += `
+            <div class="reveal flex flex-col w-full overflow-hidden ${batchIdx % 2 !== 0 ? 'reveal-delay-1' : ''}">
+              <div class="flex items-end mb-4 md:mb-6 cursor-default">
+                <h3 class="text-lg md:text-2xl font-bold text-white border-l-4 border-[#00f0ff] pl-3 md:pl-4 tracking-tight drop-shadow-md">
+                  ${batch.title}
+                </h3>
+                <span class="text-[10px] md:text-sm text-gray-400 font-normal animate-pulse ml-3 md:ml-4 mb-0.5 md:mb-1 flex items-center whitespace-nowrap">
+                  <i data-lucide="move-horizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 text-[#00ff9d]"></i> 
+                  左右滑动查看 <span class="hidden md:inline ml-1">(按住Shift+滑动滚轮)</span>
+                </span>
+              </div>
+              <div class="flex flex-row items-center justify-start pt-8 pb-8 md:pt-12 md:pb-12 pl-4 md:pl-6 min-h-[160px] md:min-h-[280px] overflow-x-auto gap-4 md:gap-0 snap-x snap-mandatory hide-scrollbar -my-4 md:-my-6">
+          `;
+          
+          batch.images.forEach((imgSrc, imgIndex) => {
+            const mlClass = imgIndex === 0 ? '' : 'md:-ml-[6.5rem]';
+            const rotateClass = imgIndex % 2 === 0 ? 'md:-rotate-2' : 'md:rotate-2';
+            // 核心排查修复：加入 encodeURIComponent 处理包含空格、括号和中文的证书文件名
+            const safeCertUrl = `./images/${encodeURIComponent(imgSrc)}`;
+            
+            certsHTML += `
+              <div class="cert-item relative cursor-pointer group flex-shrink-0 snap-center ${mlClass} ${rotateClass}" style="z-index: ${imgIndex};">
+                <div class="w-[180px] h-[135px] md:w-[260px] md:h-[195px] rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm transition-all duration-300 md:group-hover:shadow-[0_0_30px_rgba(0,240,255,0.3)] md:group-hover:border-[#00f0ff]/50">
+                  <img src="${safeCertUrl}" loading="lazy" class="w-full h-full object-cover transition-opacity duration-300 opacity-80 md:group-hover:opacity-100" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                  <div style="display:none;" class="w-full h-full flex-col items-center justify-center bg-[#1a1f3c] text-gray-500">
+                    <span class="text-xs font-bold tracking-widest text-[#00f0ff]/60">未找到照片</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          
+          certsHTML += `
+                <div class="flex-shrink-0 w-8 md:w-32 h-1 pointer-events-none"></div>
+              </div>
+            </div>
+          `;
+        });
+      document.getElementById('certificates-container').innerHTML = certsHTML;
+
+      const experienceHTML = EXPERIENCES.map((exp, i) => `
+        <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border-l-2 md:border-l border-white/10 md:border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default ${i % 2 !== 0 ? 'reveal-delay-1' : ''}">
+          <div class="absolute -left-2 top-10 md:hidden w-4 h-4 rounded-full bg-[#080b1a] border-2 border-[#00f0ff] z-20"></div>
+          
+          <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+            <div class="absolute -top-12 -right-12 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[#00f0ff]/10 to-[#00ff9d]/10 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
+          </div>
+          <div class="relative z-10 md:grid md:grid-cols-12 md:gap-8 items-start pl-4 md:pl-0">
+            <div class="md:col-span-4 mb-5 md:mb-0">
+              <div class="hidden md:inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#1a1f3c] border border-white/10 text-[#00f0ff] mb-6 group-hover:scale-110 transition-transform duration-500">
+                  <i data-lucide="folder-git-2" class="w-6 h-6"></i>
+              </div>
+              <h3 class="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 leading-tight">${exp.title}</h3>
+              <p class="text-[#00ff9d] text-xs md:text-sm font-semibold tracking-wide inline-block px-3 py-1 bg-[#00ff9d]/10 rounded-full">${exp.role}</p>
+            </div>
+            <div class="md:col-span-8 relative">
+              <ul class="space-y-3 md:space-y-4">
+                ${exp.bullets.map(bullet => `
+                  <li class="flex items-start gap-2 md:gap-3 text-gray-400 font-light text-sm md:text-base leading-relaxed">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-[#00f0ff] shrink-0 opacity-70"></i>
+                    <span>${bullet}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('experience-list-container').innerHTML = experienceHTML;
+
+      lucide.createIcons();
+
+      const menuBtn = document.getElementById('menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuIcon = document.getElementById('menu-icon');
+      let isMenuOpen = false;
+
+      menuBtn.addEventListener('click', () => {
+        isMenuOpen = !isMenuOpen;
+        if(isMenuOpen) {
+          mobileMenu.style.height = mobileMenu.scrollHeight + 'px';
+          mobileMenu.style.opacity = '1';
+          mobileMenu.classList.add('border-t');
+          menuIcon.setAttribute('data-lucide', 'x');
+        } else {
+          mobileMenu.style.height = '0px';
+          mobileMenu.style.opacity = '0';
+          setTimeout(() => mobileMenu.classList.remove('border-t'), 300);
+          menuIcon.setAttribute('data-lucide', 'menu');
+        }
+        lucide.createIcons();
+      });
+
+      const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+      mobileNavLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if(isMenuOpen) menuBtn.click();
+        });
+      });
+
+      const nav = document.getElementById('navbar');
+      const forestBg = document.getElementById('forest-bg');
+      const forestMg = document.getElementById('forest-mg');
+      const forestFg = document.getElementById('forest-fg');
+      const forestWrapper = document.getElementById('forest-wrapper');
+      const heroVideoLayer = document.getElementById('hero-video-layer');
+      const sciFiVideo = document.getElementById('sci-fi-video');
+      const heroTextInitial = document.getElementById('hero-text-initial');
+      const heroTextFinal = document.getElementById('hero-text-final');
+
+      const ambientCanvas = document.getElementById('ambient-canvas');
+      const ambCtx = ambientCanvas.getContext('2d');
+      let ambWidth, ambHeight;
+      let targetMouseX = window.innerWidth / 2;
+      let targetMouseY = window.innerHeight / 2;
+      let cyanX = targetMouseX, cyanY = targetMouseY;
+      let greenX = targetMouseX, greenY = targetMouseY;
+
+      function resizeAmbient() {
+        ambWidth = window.innerWidth;
+        ambHeight = window.innerHeight;
+        ambientCanvas.width = ambWidth;
+        ambientCanvas.height = ambHeight;
+      }
+      window.addEventListener('resize', resizeAmbient);
+      resizeAmbient();
+
+      window.addEventListener('mousemove', (e) => {
+        targetMouseX = e.clientX;
+        targetMouseY = e.clientY;
+      });
+
+      function drawAmbientGlow() {
+        ambCtx.clearRect(0, 0, ambWidth, ambHeight);
+        cyanX += (targetMouseX - cyanX) * 0.06;
+        cyanY += (targetMouseY - cyanY) * 0.06;
+        greenX += (targetMouseX - greenX) * 0.03;
+        greenY += (targetMouseY - greenY) * 0.03;
+
+        ambCtx.globalCompositeOperation = 'screen';
+        const gradCyan = ambCtx.createRadialGradient(cyanX, cyanY, 0, cyanX, cyanY, 600);
+        gradCyan.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
+        gradCyan.addColorStop(1, 'rgba(0, 240, 255, 0)');
+        ambCtx.fillStyle = gradCyan;
+        ambCtx.fillRect(0, 0, ambWidth, ambHeight);
+
+        const gradGreen = ambCtx.createRadialGradient(greenX, greenY, 0, greenX, greenY, 600);
+        gradGreen.addColorStop(0, 'rgba(0, 255, 157, 0.2)');
+        gradGreen.addColorStop(1, 'rgba(0, 255, 157, 0)');
+        ambCtx.fillStyle = gradGreen;
+        ambCtx.fillRect(0, 0, ambWidth, ambHeight);
+
+        ambCtx.globalCompositeOperation = 'source-over';
+        requestAnimationFrame(drawAmbientGlow);
+      }
+      drawAmbientGlow();
+
+      let hasVideoStarted = false;
+      let isVideoEnded = false;
+      let videoWeight = 0;
+
+      if (sciFiVideo) {
+        sciFiVideo.pause();
+        sciFiVideo.currentTime = 0;
+        sciFiVideo.addEventListener('ended', () => {
+          isVideoEnded = true;
+        });
+      }
+
+      let mouseX = 0, mouseY = 0;
+      let targetX = 0, targetY = 0;
+
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+        mouseY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+      });
+
+      function animateParallax() {
+        targetX += (mouseX - targetX) * 0.05; 
+        targetY += (mouseY - targetY) * 0.05;
+
+        if (window.scrollY < window.innerHeight * 1.5) {
+          if(forestBg) forestBg.style.transform = `translate(${targetX * 10}px, ${targetY * 10}px) scale(1.05)`;
+          if(forestMg) forestMg.style.transform = `translate(${targetX * 25}px, ${targetY * 25}px) scale(1.15)`;
+          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30}px, ${targetY * 30}px)`;
+          if(forestFg) forestFg.style.transform = `translate(${targetX * 60}px, ${targetY * 60}px) scale(1.2)`;
+          
+          if (sciFiVideo && isVideoEnded) {
+            videoWeight += (1 - videoWeight) * 0.03; 
+            const curX = targetX * 15 * videoWeight;
+            const curY = targetY * 15 * videoWeight;
+            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(1.05)`;
+          }
+        }
+        requestAnimationFrame(animateParallax);
+      }
+      animateParallax();
+
+      function handleScrollState() {
+        const scrollY = window.scrollY;
+        
+        if (scrollY < window.innerHeight * 0.4) {
+          document.body.classList.add('hero-mode');
+        } else {
+          document.body.classList.remove('hero-mode');
+        }
+
+        if (scrollY > 50) {
+          nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+          nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+        } else {
+          nav.classList.remove('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+          nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+        }
+
+        const maxScroll = window.innerHeight * 1.2; 
+        const progress = Math.min(scrollY / maxScroll, 1);
+        
+        if(forestWrapper) {
+          forestWrapper.style.opacity = Math.max(1 - progress * 1.5, 0);
+          forestWrapper.style.transform = `scale(${1 + progress * 0.05}) translateY(${progress * 30}px)`;
+        }
+
+        if(heroVideoLayer) {
+          heroVideoLayer.style.opacity = Math.min(progress * 1.5, 1);
+        }
+
+        if (progress > 0.05 && !hasVideoStarted && sciFiVideo) {
+          hasVideoStarted = true;
+          sciFiVideo.play().catch(e => console.log("Auto-play blocked:", e));
+        }
+
+        if(heroTextFinal) {
+          const text2Progress = Math.max(0, (scrollY - window.innerHeight * 0.4) / (window.innerHeight * 0.6));
+          const finalProgress = Math.min(text2Progress, 1);
+          heroTextFinal.style.opacity = finalProgress;
+          heroTextFinal.style.transform = `scale(${0.9 + finalProgress * 0.1}) translateY(${-20 + finalProgress * 20}px)`;
+        }
+      }
+
+      window.addEventListener('scroll', handleScrollState);
+      handleScrollState();
+
+      const originalTitle = document.title;
+      let titleTimeout;
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          clearTimeout(titleTimeout);
+          document.title = "👀 简历还在等待查阅...";
+        } else {
+          document.title = "⚡️ 欢迎回来！";
+          titleTimeout = setTimeout(() => {
+            document.title = originalTitle;
+          }, 2000);
+        }
+      });
+
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+            observer.unobserve(entry.target); 
+          }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+
+      document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+
+      const sections = document.querySelectorAll("section[id], footer[id]");
+      const navLinks = document.querySelectorAll("#navbar a[href^='#'], #mobile-menu a[href^='#']");
+      
+      const scrollSpyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const currentId = entry.target.getAttribute("id");
+            navLinks.forEach(link => {
+              link.classList.remove("nav-active");
+              if (link.getAttribute("href") === `#${currentId}`) {
+                link.classList.add("nav-active");
+              }
+            });
+          }
+        });
+      }, { rootMargin: "-40% 0px -60% 0px" });
+
+      sections.forEach(section => scrollSpyObserver.observe(section));
+
+      window.addEventListener('scroll', () => {
+        if (Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50) {
+          navLinks.forEach(link => link.classList.remove("nav-active"));
+          navLinks.forEach(link => {
+            if (link.getAttribute("href") === "#contact") link.classList.add("nav-active");
+          });
+        }
+      });
+
+    });
+  </script>
+
+  <script id="contact-copy-script">
+    document.addEventListener('DOMContentLoaded', () => {
+      const setupCopyBtn = (btnId) => {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        
+        const copyVal = btn.getAttribute('data-copy-val');
+        const originalText = btn.getAttribute('data-original-text');
+        const iconName = btn.getAttribute('data-icon');
+        
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          const tempInput = document.createElement('input');
+          tempInput.value = copyVal;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempInput);
+          
+          const currentWidth = btn.offsetWidth;
+          btn.style.width = currentWidth + 'px';
+          btn.innerHTML = '✅ 已复制';
+          
+          setTimeout(() => {
+            btn.style.width = '';
+            btn.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i><span>${originalText}</span>`;
+            if (window.lucide) {
+              window.lucide.createIcons({ root: btn });
+            }
+          }, 2000);
+        });
+      };
+
+      setupCopyBtn('copy-email-btn');
+      setupCopyBtn('copy-phone-btn');
+    });
+  </script>
+</body>
+</html>
