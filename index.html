@@ -132,8 +132,23 @@
 </head>
 <body>
 
+  <!-- 极客自定义光标结构 -->
   <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#00f0ff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
   <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#00f0ff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
+
+  <!-- 移动端专属全屏图片弹窗 (Lightbox) -->
+  <div id="mobile-lightbox" class="fixed inset-0 z-[99999] bg-[#080b1a]/95 backdrop-blur-xl hidden flex-col items-center justify-center opacity-0 transition-opacity duration-300">
+    <button id="lightbox-close-btn" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer">
+      <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
+    </button>
+    <div class="w-full max-w-[90vw] h-full max-h-[80vh] flex items-center justify-center relative pointer-events-none">
+      <!-- 极客加载环，缓解照片过大时的加载等待 -->
+      <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center z-[-1]">
+         <span class="w-10 h-10 rounded-full border-4 border-white/10 border-t-[#00f0ff] animate-spin"></span>
+      </div>
+      <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-[0_0_40px_rgba(0,240,255,0.2)] scale-95 transition-all duration-300 opacity-0 pointer-events-auto" onload="this.classList.remove('opacity-0'); document.getElementById('lightbox-loader').style.display='none';" />
+    </div>
+  </div>
 
   <canvas id="ambient-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-[-1]"></canvas>
 
@@ -168,6 +183,7 @@
       </div>
 
       <div class="hidden md:flex items-center gap-3">
+        <!-- 规范 GitHub 相对路径，添加 download 强制名称属性 -->
         <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
           <i data-lucide="download" class="w-4 h-4"></i>
           下载 PDF
@@ -177,7 +193,7 @@
         </button>
       </div>
 
-      <button id="menu-toggle" class="md:hidden text-white p-2" aria-label="Toggle Menu">
+      <button id="menu-toggle" class="md:hidden text-white p-2 outline-none cursor-pointer" aria-label="Toggle Menu">
         <i id="menu-icon" data-lucide="menu"></i>
       </button>
     </div>
@@ -368,6 +384,7 @@
       { name: 'PPT渲染', icon: 'monitor-play' }
     ];
 
+    // 注意：这两张图由于是独立调用，请确保它们重命名为 1.png 和 2.jpg 并放置在与 index.html 同级目录下
     const CORE_COMPETENCIES = [
       { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
       { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
@@ -406,45 +423,32 @@
       }
     ];
 
+    // -------------------------------------------------------------
+    // 通过 Python 脚本极速压缩重命名后，自动生成的证书数组
+    // -------------------------------------------------------------
     const certificateBatches = [
       {
-        title: "Datawhale 认证",
-        images: [
-          "254170-_zGdVfMRZUf01pCPJroNNw.png", "254170-97Ef9331wyQ8wfaSKpmNLw.png", 
-          "254170-fJAXJCzExKHTfJk7FO5A5g.png", "254170-IkMJM7QcH7wGR2Uvv3yPPQ.png", 
-          "254170-nsMZEmlaGoNIc-BLMxCMIw.png", "254170-sbGv5a8k4zU-oC9BbehhQg.png", 
-          "254170-ywDpUgUMn3B2WWI9OQbUEg.png"
-        ]
+        title: "Datawhale & 互联网大厂 AI 系列证书",
+        images: ['batch_1_img_1.png', 'batch_1_img_2.png', 'batch_1_img_3.png', 'batch_1_img_4.png', 'batch_1_img_5.png', 'batch_1_img_6.png', 'batch_1_img_7.png']
       },
       {
-        title: "阿里云 Apsara Clouder 专项技能认证",
-        images: [
-          "img_3c771a4e1b2138f01562957d5211de2c.png", "img_6f425f01d94ea23c188093f7b2ed1ddf.png", 
-          "img_9db90b74e92c100956e03f8a5c938737.png", "img_350ff38a72dfb953b2aac6df0d853189.png", 
-          "img_817a890a12bd6b085eaf6a7f7254b8f1.png", "img_b6373cd688bfe6f85d7f84614c19b63a.png", 
-          "img_c8d14932dd9cb70e41ab8ca5222f3787.png", "img_cc0cbe3dc5ef66ca7e6b3054879b0ef2.png"
-        ]
+        title: "北京深势科技有限公司 AI 系列证书",
+        images: ['batch_2_img_1.png']
       },
       {
-        title: "北京深势科技有限公司 AI 系列认证",
-        images: ["certificate.png"]
+        title: "华为系列证书",
+        images: ['batch_3_img_1.png', 'batch_3_img_2.png', 'batch_3_img_3.png', 'batch_3_img_4.png', 'batch_3_img_5.png', 'batch_3_img_6.png', 'batch_3_img_7.png']
       },
       {
-        title: "华为云微认证",
-        images: [
-          "屏幕截图 2026-08-18 194856.png", "20260816150002.png", "20260816151500.png", 
-          "20260816151501.png", "20260817034500.png", "20260817040000.png", 
-          "20260817040003.png"
-        ]
+        title: "科大讯飞",
+        images: ['batch_4_img_1.png', 'batch_4_img_2.png', 'batch_4_img_3.png', 'batch_4_img_4.png']
       },
       {
-        title: "AI大学堂认证",
-        images: [
-          "Ai大学认证证书 (1).png", "Ai大学认证证书 (2).png", 
-          "Ai大学认证证书 (3).png", "Ai大学认证证书.png"
-        ]
+        title: "阿里",
+        images: ['batch_5_img_1.png', 'batch_5_img_2.png', 'batch_5_img_3.png', 'batch_5_img_4.png', 'batch_5_img_5.png', 'batch_5_img_6.png', 'batch_5_img_7.png', 'batch_5_img_8.png']
       }
     ];
+    // -------------------------------------------------------------
 
     document.addEventListener("DOMContentLoaded", () => {
       
@@ -475,6 +479,41 @@
         });
       }
 
+      // 移动端全屏 Lightbox 逻辑
+      const lightbox = document.getElementById('mobile-lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxCloseBtn = document.getElementById('lightbox-close-btn');
+      const lightboxLoader = document.getElementById('lightbox-loader');
+
+      function openLightbox(src) {
+        lightboxImg.src = '';
+        lightboxImg.classList.add('opacity-0', 'scale-95');
+        lightboxImg.classList.remove('scale-100');
+        lightboxLoader.style.display = 'flex';
+
+        lightbox.classList.remove('hidden');
+        setTimeout(() => {
+          lightbox.classList.remove('opacity-0');
+          lightboxImg.src = src;
+          lightboxImg.classList.add('scale-100');
+        }, 10);
+      }
+
+      function closeLightbox() {
+        lightbox.classList.add('opacity-0');
+        lightboxImg.classList.remove('scale-100');
+        lightboxImg.classList.add('scale-95');
+        setTimeout(() => {
+          lightbox.classList.add('hidden');
+          lightboxImg.src = '';
+        }, 300);
+      }
+
+      if(lightboxCloseBtn) lightboxCloseBtn.addEventListener('click', closeLightbox);
+      if(lightbox) lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+
       const skillsHTML = [...SKILLS, ...SKILLS, ...SKILLS].map(skill => `
         <div class="flex items-center gap-2 md:gap-3 px-6 md:px-8 opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
           <i data-lucide="${skill.icon}" class="text-white w-5 h-5 md:w-6 md:h-6"></i>
@@ -488,7 +527,7 @@
         const cardClass = hasImage ? 'hover-float-card' : '';
         const safeImageUrl = hasImage ? `./${encodeURIComponent(comp.image)}` : '';
         
-        // 桌面端的悬浮隐藏图（仅电脑可见）
+        // 电脑端专属的悬浮动效图
         const floatImgHTML = hasImage ? `
           <img
             src="${safeImageUrl}"
@@ -499,15 +538,9 @@
           />
         ` : '';
 
-        // 修复点3：移动端的内嵌固定图（仅手机可见，完美解决照片不刷新的痛点）
-        const mobileImgHTML = hasImage ? `
-          <div class="md:hidden w-full mb-6 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-             <img src="${safeImageUrl}" alt="${comp.title}" class="w-full h-auto object-cover" onerror="this.style.display='none'"/>
-          </div>
-        ` : '';
-
+        // 卡片渲染（移动端依赖外层点击唤出 Lightbox）
         return `
-        <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer ${i % 2 !== 0 ? 'reveal-delay-1' : ''} ${cardClass}">
+        <div data-img-src="${safeImageUrl}" class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer ${i % 2 !== 0 ? 'reveal-delay-1' : ''} ${cardClass}">
           
           <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
             <div class="absolute -top-12 -right-12 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[#00f0ff]/10 to-[#00ff9d]/10 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
@@ -516,7 +549,6 @@
           ${floatImgHTML}
           
           <div class="relative z-10 flex flex-col h-full pointer-events-none">
-            ${mobileImgHTML}
             <div class="w-12 h-12 md:w-14 md:h-14 mb-4 md:mb-6 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#00f0ff] group-hover:scale-110 transition-transform duration-500">
                 <i data-lucide="${comp.icon}" class="w-6 h-6 md:w-7 md:h-7"></i>
             </div>
@@ -530,73 +562,93 @@
       }).join('');
       document.getElementById('core-competencies-container').innerHTML = competenciesHTML;
 
-      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-        const floatCards = document.querySelectorAll('.hover-float-card');
-        floatCards.forEach(card => {
-          const floatingImg = card.querySelector('.floating-image');
-          
-          if (floatingImg) {
-            card.addEventListener('mouseenter', () => {
+      const floatCards = document.querySelectorAll('.hover-float-card');
+      floatCards.forEach(card => {
+        const floatingImg = card.querySelector('.floating-image');
+        const imgSrc = card.getAttribute('data-img-src');
+        
+        if (floatingImg) {
+          // PC 端 Hover 效果
+          card.addEventListener('mouseenter', () => {
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
               floatingImg.style.opacity = '1';
               card.style.zIndex = '999';
-            });
+            }
+          });
 
-            card.addEventListener('mousemove', (e) => {
+          card.addEventListener('mousemove', (e) => {
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
               const rect = card.getBoundingClientRect();
               const x = e.clientX - rect.left + 5; 
               const y = e.clientY - rect.top + 5;  
-
               floatingImg.style.transform = `translate(${x}px, ${y}px) rotate(8deg)`;
-            });
+            }
+          });
 
-            card.addEventListener('mouseleave', () => {
+          card.addEventListener('mouseleave', () => {
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
               floatingImg.style.opacity = '0';
               card.style.zIndex = '';
-            });
-          }
-        });
-      }
+            }
+          });
 
-      let certsHTML = '';
-      certificateBatches.forEach((batch, batchIdx) => {
-          certsHTML += `
-            <div class="reveal flex flex-col w-full overflow-hidden ${batchIdx % 2 !== 0 ? 'reveal-delay-1' : ''}">
-              <div class="flex items-end mb-4 md:mb-6 cursor-default">
-                <h3 class="text-lg md:text-2xl font-bold text-white border-l-4 border-[#00f0ff] pl-3 md:pl-4 tracking-tight drop-shadow-md">
-                  ${batch.title}
-                </h3>
-                <span class="text-[10px] md:text-sm text-gray-400 font-normal animate-pulse ml-3 md:ml-4 mb-0.5 md:mb-1 flex items-center whitespace-nowrap">
-                  <i data-lucide="move-horizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 text-[#00ff9d]"></i> 
-                  左右滑动查看 <span class="hidden md:inline ml-1">(按住Shift+滑动滚轮)</span>
-                </span>
-              </div>
-              <div class="flex flex-row items-center justify-start pt-8 pb-8 md:pt-12 md:pb-12 pl-4 md:pl-6 min-h-[160px] md:min-h-[280px] overflow-x-auto gap-4 md:gap-0 snap-x snap-mandatory hide-scrollbar -my-4 md:-my-6">
-          `;
-          
-          batch.images.forEach((imgSrc, imgIndex) => {
-            const mlClass = imgIndex === 0 ? '' : 'md:-ml-[6.5rem]';
-            const rotateClass = imgIndex % 2 === 0 ? 'md:-rotate-2' : 'md:rotate-2';
-            const safeCertUrl = `./images/${encodeURIComponent(imgSrc)}`;
+          // 核心交互：在不支持精细指针（即移动端）的设备上，点击呼出全屏 Lightbox
+          card.addEventListener('click', () => {
+            if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+              if (imgSrc) openLightbox(imgSrc);
+            }
+          });
+        }
+      });
+
+      function renderCertificates() {
+        if(!certificateBatches || certificateBatches.length === 0) return;
+        
+        let certsHTML = '';
+        certificateBatches.forEach((batch, batchIdx) => {
+            certsHTML += `
+              <div class="reveal flex flex-col w-full overflow-hidden ${batchIdx % 2 !== 0 ? 'reveal-delay-1' : ''}">
+                <div class="flex items-end mb-4 md:mb-6 cursor-default">
+                  <h3 class="text-lg md:text-2xl font-bold text-white border-l-4 border-[#00f0ff] pl-3 md:pl-4 tracking-tight drop-shadow-md">
+                    ${batch.title}
+                  </h3>
+                  <span class="text-[10px] md:text-sm text-gray-400 font-normal animate-pulse ml-3 md:ml-4 mb-0.5 md:mb-1 flex items-center whitespace-nowrap">
+                    <i data-lucide="move-horizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 text-[#00ff9d]"></i> 
+                    左右滑动查看 <span class="hidden md:inline ml-1">(按住Shift+滑动滚轮)</span>
+                  </span>
+                </div>
+                <div class="flex flex-row items-center justify-start pt-8 pb-8 md:pt-12 md:pb-12 pl-4 md:pl-6 min-h-[160px] md:min-h-[280px] overflow-x-auto gap-4 md:gap-0 snap-x snap-mandatory hide-scrollbar -my-4 md:-my-6">
+            `;
+            
+            batch.images.forEach((imgSrc, imgIndex) => {
+              const mlClass = imgIndex === 0 ? '' : 'md:-ml-[6.5rem]';
+              const rotateClass = imgIndex % 2 === 0 ? 'md:-rotate-2' : 'md:rotate-2';
+              
+              // 使用 Python 处理后的安全路径引用
+              const safeCertUrl = `./images/${imgSrc}`;
+              
+              certsHTML += `
+                <div class="cert-item relative cursor-pointer group flex-shrink-0 snap-center ${mlClass} ${rotateClass}" style="z-index: ${imgIndex};">
+                  <div class="w-[180px] h-[135px] md:w-[260px] md:h-[195px] rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm transition-all duration-300 md:group-hover:shadow-[0_0_30px_rgba(0,240,255,0.3)] md:group-hover:border-[#00f0ff]/50">
+                    <img src="${safeCertUrl}" loading="lazy" class="w-full h-full object-cover transition-opacity duration-300 opacity-80 md:group-hover:opacity-100" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    <div style="display:none;" class="w-full h-full flex-col items-center justify-center bg-[#1a1f3c] text-gray-500">
+                      <span class="text-xs font-bold tracking-widest text-[#00f0ff]/60">未找到照片</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
             
             certsHTML += `
-              <div class="cert-item relative cursor-pointer group flex-shrink-0 snap-center ${mlClass} ${rotateClass}" style="z-index: ${imgIndex};">
-                <div class="w-[180px] h-[135px] md:w-[260px] md:h-[195px] rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm transition-all duration-300 md:group-hover:shadow-[0_0_30px_rgba(0,240,255,0.3)] md:group-hover:border-[#00f0ff]/50">
-                  <img src="${safeCertUrl}" loading="lazy" class="w-full h-full object-cover transition-opacity duration-300 opacity-80 md:group-hover:opacity-100" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                  <div style="display:none;" class="w-full h-full flex-col items-center justify-center bg-[#1a1f3c] text-gray-500">
-                    <span class="text-xs font-bold tracking-widest text-[#00f0ff]/60">未找到照片</span>
-                  </div>
+                  <div class="flex-shrink-0 w-8 md:w-32 h-1 pointer-events-none"></div>
                 </div>
               </div>
             `;
           });
-          
-          certsHTML += `
-                <div class="flex-shrink-0 w-8 md:w-32 h-1 pointer-events-none"></div>
-              </div>
-            </div>
-          `;
-        });
-      document.getElementById('certificates-container').innerHTML = certsHTML;
+        document.getElementById('certificates-container').innerHTML = certsHTML;
+      }
+      
+      renderCertificates();
 
       const experienceHTML = EXPERIENCES.map((exp, i) => `
         <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border-l-2 md:border-l border-white/10 md:border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default ${i % 2 !== 0 ? 'reveal-delay-1' : ''}">
@@ -740,7 +792,6 @@
         targetY += (mouseY - targetY) * 0.05;
 
         if (window.scrollY < window.innerHeight * 1.5) {
-          // 修复点2：移动端缩小放大倍数，减弱滑动幅度，避免人物或树木变得大到吓人
           const isMobile = window.innerWidth < 768;
           const scaleBg = isMobile ? 1.02 : 1.05;
           const scaleMg = isMobile ? 1.05 : 1.15;
