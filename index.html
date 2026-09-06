@@ -7,6 +7,8 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- 引入 Three.js 引擎核心 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
@@ -29,14 +31,16 @@
       padding: 0;
     }
 
-    /* 极客自定义光标：全局强制隐藏默认鼠标 */
     @media (hover: hover) and (pointer: fine) {
       * {
         cursor: none !important;
       }
     }
 
-    /* 光标智能变色系统 */
+    #cert-3d-modal, #cert-3d-modal * {
+      cursor: auto !important;
+    }
+
     body.hero-mode #cursor-dot {
       background-color: #ffffff !important;
     }
@@ -80,21 +84,6 @@
       animation: marquee 40s linear infinite;
     }
 
-    .cert-item {
-      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @media (min-width: 768px) {
-      .cert-item:hover {
-        transform: scale(1.1) translateY(-30px) rotate(0deg) !important;
-        z-index: 50 !important;
-      }
-    }
-    @media (max-width: 767px) {
-      .cert-item:active {
-        transform: scale(1.05);
-      }
-    }
-
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -132,7 +121,7 @@
 </head>
 <body>
 
-  <!-- 极客自定义光标结构 -->
+  <!-- 极客自定义光标 -->
   <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#00f0ff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
   <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#00f0ff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
 
@@ -142,12 +131,20 @@
       <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
     </button>
     <div class="w-full max-w-[90vw] h-full max-h-[80vh] flex items-center justify-center relative pointer-events-none">
-      <!-- 极客加载环，缓解照片过大时的加载等待 -->
       <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center z-[-1]">
          <span class="w-10 h-10 rounded-full border-4 border-white/10 border-t-[#00f0ff] animate-spin"></span>
       </div>
       <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-[0_0_40px_rgba(0,240,255,0.2)] scale-95 transition-all duration-300 opacity-0 pointer-events-auto" onload="this.classList.remove('opacity-0'); document.getElementById('lightbox-loader').style.display='none';" />
     </div>
+  </div>
+
+  <!-- 3D 证书全景专属弹窗 (Modal) -->
+  <div id="cert-3d-modal" class="fixed inset-0 z-[100000] bg-[#020402] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-500 font-mono touch-none">
+    <button id="cert-modal-close" onclick="closeCertModal()" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer z-[100001]">
+      <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
+    </button>
+    <div id="cert-loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#55aa33] text-xs tracking-[4px] z-10 transition-opacity duration-800">LOADING FRAGMENTS...</div>
+    <div id="cert-canvas-container" class="w-full h-full absolute inset-0 z-1"></div>
   </div>
 
   <canvas id="ambient-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-[-1]"></canvas>
@@ -171,9 +168,6 @@
         <a href="#projects" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
           实战项目<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="#work" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
-          我的证书<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
-        </a>
         <a href="#specialties" class="text-sm font-medium text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] hover:text-white transition-colors relative group">
           个人特长<span class="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] transition-all duration-300 group-hover:w-full"></span>
         </a>
@@ -183,7 +177,6 @@
       </div>
 
       <div class="hidden md:flex items-center gap-3">
-        <!-- 规范 GitHub 相对路径，添加 download 强制名称属性 -->
         <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
           <i data-lucide="download" class="w-4 h-4"></i>
           下载 PDF
@@ -203,7 +196,6 @@
         <a href="#about" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">关于我</a>
         <a href="#skills" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">核心技术栈</a>
         <a href="#projects" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">实战项目</a>
-        <a href="#work" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">我的证书</a>
         <a href="#specialties" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">个人特长</a>
         <a href="#contact" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">联系我</a>
         
@@ -308,13 +300,6 @@
       <div id="core-competencies-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
     </section>
 
-    <section id="work" class="py-12 md:py-16 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 overflow-hidden bg-transparent">
-      <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 md:mb-10 gap-4 reveal cursor-default">
-        <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white">我的证书</h2>
-      </div>
-      <div id="certificates-container" class="flex flex-col space-y-10 md:space-y-12"></div>
-    </section>
-
     <section id="projects" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
       <div class="mb-10 md:mb-16 cursor-default">
         <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">核心项目与科研实践</h2>
@@ -384,7 +369,6 @@
       { name: 'PPT渲染', icon: 'monitor-play' }
     ];
 
-    // 注意：这两张图由于是独立调用，请确保它们重命名为 1.png 和 2.jpg 并放置在与 index.html 同级目录下
     const CORE_COMPETENCIES = [
       { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
       { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
@@ -423,32 +407,13 @@
       }
     ];
 
-    // -------------------------------------------------------------
-    // 通过 Python 脚本极速压缩重命名后，自动生成的证书数组
-    // -------------------------------------------------------------
     const certificateBatches = [
-      {
-        title: "Datawhale & 互联网大厂 AI 系列证书",
-        images: ['batch_1_img_1.png', 'batch_1_img_2.png', 'batch_1_img_3.png', 'batch_1_img_4.png', 'batch_1_img_5.png', 'batch_1_img_6.png', 'batch_1_img_7.png']
-      },
-      {
-        title: "北京深势科技有限公司 AI 系列证书",
-        images: ['batch_2_img_1.png']
-      },
-      {
-        title: "华为系列证书",
-        images: ['batch_3_img_1.png', 'batch_3_img_2.png', 'batch_3_img_3.png', 'batch_3_img_4.png', 'batch_3_img_5.png', 'batch_3_img_6.png', 'batch_3_img_7.png']
-      },
-      {
-        title: "科大讯飞",
-        images: ['batch_4_img_1.png', 'batch_4_img_2.png', 'batch_4_img_3.png', 'batch_4_img_4.png']
-      },
-      {
-        title: "阿里",
-        images: ['batch_5_img_1.png', 'batch_5_img_2.png', 'batch_5_img_3.png', 'batch_5_img_4.png', 'batch_5_img_5.png', 'batch_5_img_6.png', 'batch_5_img_7.png', 'batch_5_img_8.png']
-      }
+      { title: "Datawhale & 互联网大厂 AI 系列证书", images: ['batch_1_img_1.png', 'batch_1_img_2.png', 'batch_1_img_3.png', 'batch_1_img_4.png', 'batch_1_img_5.png', 'batch_1_img_6.png', 'batch_1_img_7.png'] },
+      { title: "北京深势科技有限公司 AI 系列证书", images: ['batch_2_img_1.png'] },
+      { title: "华为系列证书", images: ['batch_3_img_1.png', 'batch_3_img_2.png', 'batch_3_img_3.png', 'batch_3_img_4.png', 'batch_3_img_5.png', 'batch_3_img_6.png', 'batch_3_img_7.png'] },
+      { title: "科大讯飞", images: ['batch_4_img_1.png', 'batch_4_img_2.png', 'batch_4_img_3.png', 'batch_4_img_4.png'] },
+      { title: "阿里", images: ['batch_5_img_1.png', 'batch_5_img_2.png', 'batch_5_img_3.png', 'batch_5_img_4.png', 'batch_5_img_5.png', 'batch_5_img_6.png', 'batch_5_img_7.png', 'batch_5_img_8.png'] }
     ];
-    // -------------------------------------------------------------
 
     document.addEventListener("DOMContentLoaded", () => {
       
@@ -479,7 +444,6 @@
         });
       }
 
-      // 移动端全屏 Lightbox 逻辑
       const lightbox = document.getElementById('mobile-lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
       const lightboxCloseBtn = document.getElementById('lightbox-close-btn');
@@ -527,7 +491,6 @@
         const cardClass = hasImage ? 'hover-float-card' : '';
         const safeImageUrl = hasImage ? `./${encodeURIComponent(comp.image)}` : '';
         
-        // 电脑端专属的悬浮动效图
         const floatImgHTML = hasImage ? `
           <img
             src="${safeImageUrl}"
@@ -538,7 +501,21 @@
           />
         ` : '';
 
-        // 卡片渲染（移动端依赖外层点击唤出 Lightbox）
+        // 仅手机端显示的提示词（前两个卡片）
+        const mobilePrompt = (i === 0 || i === 1) 
+          ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
+          : '';
+
+        // "多项 AI 认证" 独占的新悬停展开交互按钮（精准修复版：夺回点击控制权并使用稳定 CSS 动画）
+        const actionBtn = (i === CORE_COMPETENCIES.length - 1)
+          ? `<span onclick="event.stopPropagation(); openCertModal();" class="ml-2 relative group/btn inline-flex items-center cursor-pointer pointer-events-auto">
+               <span class="text-[#00ff9d] text-xs font-bold tracking-widest transition-colors duration-300 group-hover/btn:text-white relative z-10">点击查看</span>
+               <span class="absolute bottom-[-2px] left-0 w-full h-[1px] bg-[#00ff9d]/30 overflow-hidden">
+                 <span class="absolute top-0 -left-full w-full h-full bg-[#00ff9d] transition-all duration-300 ease-out group-hover/btn:left-0"></span>
+               </span>
+             </span>`
+          : '';
+
         return `
         <div data-img-src="${safeImageUrl}" class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer ${i % 2 !== 0 ? 'reveal-delay-1' : ''} ${cardClass}">
           
@@ -554,7 +531,8 @@
             </div>
             <div>
               <h3 class="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 tracking-tight">${comp.title}</h3>
-              <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base">${comp.desc}</p>
+              <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base inline">${comp.desc}</p>${actionBtn}
+              ${mobilePrompt}
             </div>
           </div>
         </div>
@@ -568,7 +546,6 @@
         const imgSrc = card.getAttribute('data-img-src');
         
         if (floatingImg) {
-          // PC 端 Hover 效果
           card.addEventListener('mouseenter', () => {
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
               floatingImg.style.opacity = '1';
@@ -592,7 +569,6 @@
             }
           });
 
-          // 核心交互：在不支持精细指针（即移动端）的设备上，点击呼出全屏 Lightbox
           card.addEventListener('click', () => {
             if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
               if (imgSrc) openLightbox(imgSrc);
@@ -600,55 +576,6 @@
           });
         }
       });
-
-      function renderCertificates() {
-        if(!certificateBatches || certificateBatches.length === 0) return;
-        
-        let certsHTML = '';
-        certificateBatches.forEach((batch, batchIdx) => {
-            certsHTML += `
-              <div class="reveal flex flex-col w-full overflow-hidden ${batchIdx % 2 !== 0 ? 'reveal-delay-1' : ''}">
-                <div class="flex items-end mb-4 md:mb-6 cursor-default">
-                  <h3 class="text-lg md:text-2xl font-bold text-white border-l-4 border-[#00f0ff] pl-3 md:pl-4 tracking-tight drop-shadow-md">
-                    ${batch.title}
-                  </h3>
-                  <span class="text-[10px] md:text-sm text-gray-400 font-normal animate-pulse ml-3 md:ml-4 mb-0.5 md:mb-1 flex items-center whitespace-nowrap">
-                    <i data-lucide="move-horizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 text-[#00ff9d]"></i> 
-                    左右滑动查看 <span class="hidden md:inline ml-1">(按住Shift+滑动滚轮)</span>
-                  </span>
-                </div>
-                <div class="flex flex-row items-center justify-start pt-8 pb-8 md:pt-12 md:pb-12 pl-4 md:pl-6 min-h-[160px] md:min-h-[280px] overflow-x-auto gap-4 md:gap-0 snap-x snap-mandatory hide-scrollbar -my-4 md:-my-6">
-            `;
-            
-            batch.images.forEach((imgSrc, imgIndex) => {
-              const mlClass = imgIndex === 0 ? '' : 'md:-ml-[6.5rem]';
-              const rotateClass = imgIndex % 2 === 0 ? 'md:-rotate-2' : 'md:rotate-2';
-              
-              // 使用 Python 处理后的安全路径引用
-              const safeCertUrl = `./images/${imgSrc}`;
-              
-              certsHTML += `
-                <div class="cert-item relative cursor-pointer group flex-shrink-0 snap-center ${mlClass} ${rotateClass}" style="z-index: ${imgIndex};">
-                  <div class="w-[180px] h-[135px] md:w-[260px] md:h-[195px] rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm transition-all duration-300 md:group-hover:shadow-[0_0_30px_rgba(0,240,255,0.3)] md:group-hover:border-[#00f0ff]/50">
-                    <img src="${safeCertUrl}" loading="lazy" class="w-full h-full object-cover transition-opacity duration-300 opacity-80 md:group-hover:opacity-100" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                    <div style="display:none;" class="w-full h-full flex-col items-center justify-center bg-[#1a1f3c] text-gray-500">
-                      <span class="text-xs font-bold tracking-widest text-[#00f0ff]/60">未找到照片</span>
-                    </div>
-                  </div>
-                </div>
-              `;
-            });
-            
-            certsHTML += `
-                  <div class="flex-shrink-0 w-8 md:w-32 h-1 pointer-events-none"></div>
-                </div>
-              </div>
-            `;
-          });
-        document.getElementById('certificates-container').innerHTML = certsHTML;
-      }
-      
-      renderCertificates();
 
       const experienceHTML = EXPERIENCES.map((exp, i) => `
         <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border-l-2 md:border-l border-white/10 md:border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default ${i % 2 !== 0 ? 'reveal-delay-1' : ''}">
@@ -952,6 +879,172 @@
       setupCopyBtn('copy-email-btn');
       setupCopyBtn('copy-phone-btn');
     });
+  </script>
+
+  <!-- 3D 展厅渲染与交互控制逻辑 -->
+  <script>
+    let isCert3DReady = false;
+    let certAnimationId = null;
+    let certScene, certCamera, certRenderer, mainCarousel, cloneCarouselOuter, cloneCarouselInner;
+    let certVelocityY = -0.0015, certTargetVelocityY = 0;
+    let isCertDragging = false, certPreviousX = 0;
+
+    function initCert3D() {
+      if (isCert3DReady) return;
+      const container = document.getElementById('cert-canvas-container');
+      certScene = new THREE.Scene();
+      certScene.background = new THREE.Color(0x020402);
+      certScene.fog = new THREE.FogExp2(0x020402, 0.00035);
+      
+      const getCameraZ = () => (window.innerWidth / window.innerHeight < 1.2 ? 1850 * (1.2 / (window.innerWidth / window.innerHeight)) : 1850);
+      certCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+      certCamera.position.z = getCameraZ();
+
+      certRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      certRenderer.setSize(window.innerWidth, window.innerHeight);
+      certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(certRenderer.domElement);
+
+      mainCarousel = new THREE.Group(); 
+      cloneCarouselOuter = new THREE.Group(); 
+      cloneCarouselInner = new THREE.Group();
+      certScene.add(mainCarousel); 
+      certScene.add(cloneCarouselOuter); 
+      certScene.add(cloneCarouselInner);
+
+      const cardGeo = new THREE.ShapeGeometry((function(){
+        const s = new THREE.Shape(), w=260, h=180, r=12, x=-w/2, y=-h/2;
+        s.moveTo(x, y+r); s.lineTo(x, y+h-r); s.quadraticCurveTo(x, y+h, x+r, y+h); s.lineTo(x+w-r, y+h);
+        s.quadraticCurveTo(x+w, y+h, x+w, y+h-r); s.lineTo(x+w, y+r); s.quadraticCurveTo(x+w, y, x+w-r, y); s.lineTo(x+r, y); s.quadraticCurveTo(x, y, x, y+r);
+        return s;
+      })());
+      
+      const edgeGeo = new THREE.EdgesGeometry(cardGeo);
+      const mainMat = new THREE.LineBasicMaterial({ color: 0x55aa33, linewidth: 1, transparent: true, opacity: 0.8 });
+      const cloneMat = new THREE.LineBasicMaterial({ color: 0x113311, linewidth: 1, transparent: true, opacity: 0.2 });
+
+      const mainMeshes = [];
+      const rows = 3, cols = 9;
+      
+      for (let i = 0; i < rows; i++) {
+        const v = (Math.PI / 2 - 0.55 / 2) + (i / (rows - 1)) * 0.55;
+        for (let j = 0; j < cols; j++) {
+          const u = (j / cols) * Math.PI * 2 + Math.PI / 2 + ((i % 2 !== 0 ? (0.5 / cols) * Math.PI * 2 : 0) - (0.25 / cols) * Math.PI * 2) + ((Math.random() - 0.5) * 0.15);
+          const waveY = Math.sin(u * 4 + i * 2) * 12;
+          const pos = new THREE.Vector3(900 * Math.sin(v) * Math.cos(u), 900 * Math.cos(v) + waveY, 900 * Math.sin(v) * Math.sin(u));
+          
+          const fSpeed = Math.random() * 1.5 + 0.5, fPhase = Math.random() * Math.PI * 2, fAmp = Math.random() * 6 + 4;
+          const tiltZ = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.14 + 0.08);
+
+          const makeSlot = (parent, scale, posY, mat, opacity, borderMat) => {
+            const grp = new THREE.Group(); 
+            grp.position.copy(pos).multiplyScalar(scale); 
+            grp.position.y = posY;
+            grp.lookAt(grp.position.clone().add(grp.position.clone().normalize()));
+            grp.userData = { baseY: posY, floatSpeed: fSpeed, floatPhase: fPhase, floatAmplitude: fAmp * scale };
+            
+            const card = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial(mat));
+            const border = new THREE.LineSegments(edgeGeo, borderMat);
+            card.rotation.z = border.rotation.z = tiltZ;
+            
+            grp.add(card); 
+            grp.add(border); 
+            grp.scale.setScalar(scale); 
+            parent.add(grp); 
+            return card;
+          };
+
+          mainMeshes.push(makeSlot(mainCarousel, 1, pos.y, {color: 0x000000}, 1, mainMat));
+          makeSlot(cloneCarouselOuter, 1.1, pos.y * 1.1, {color: 0x010201, transparent: true, opacity: 0.3}, 0.3, cloneMat);
+          makeSlot(cloneCarouselInner, 0.5, pos.y * 0.5 + 300, {color: 0x010201, transparent: true, opacity: 0.1}, 0.1, cloneMat);
+        }
+      }
+
+      // 获取真实照片数据提取为扁平化的 27 张图片路径
+      const realPhotos = certificateBatches.flatMap(b => b.images).map(img => `./images/${img}`);
+      const loader = new THREE.TextureLoader();
+      let loaded = 0;
+      
+      realPhotos.forEach((url, idx) => {
+        loader.load(url, tex => {
+          if(mainMeshes[idx]) mainMeshes[idx].material = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+          loaded++;
+          if (loaded === realPhotos.length) {
+            document.getElementById('cert-loading').style.opacity = '0';
+          }
+        });
+      });
+
+      const onDown = e => { 
+        isCertDragging = true; 
+        certPreviousX = e.touches ? e.touches[0].clientX : e.clientX; 
+        certTargetVelocityY = 0; 
+      };
+      const onMove = e => { 
+        if(isCertDragging){ 
+          certTargetVelocityY = ((e.touches ? e.touches[0].clientX : e.clientX) - certPreviousX) * 0.0008; 
+          certPreviousX = e.touches ? e.touches[0].clientX : e.clientX; 
+        } 
+      };
+      const onUp = () => isCertDragging = false;
+      
+      container.addEventListener('mousedown', onDown); 
+      container.addEventListener('mousemove', onMove); 
+      container.addEventListener('mouseup', onUp); 
+      container.addEventListener('mouseleave', onUp);
+      container.addEventListener('touchstart', onDown, {passive: false}); 
+      container.addEventListener('touchmove', onMove, {passive: false}); 
+      container.addEventListener('touchend', onUp);
+      
+      window.addEventListener('resize', () => {
+        if(!isCert3DReady) return;
+        certCamera.aspect = window.innerWidth / window.innerHeight; 
+        certCamera.updateProjectionMatrix(); 
+        certCamera.position.z = getCameraZ();
+        certRenderer.setSize(window.innerWidth, window.innerHeight);
+      });
+      isCert3DReady = true;
+    }
+
+    function animateCert3D() {
+      certAnimationId = requestAnimationFrame(animateCert3D);
+      if (isCertDragging) {
+        certVelocityY = certTargetVelocityY;
+      } else {
+        certVelocityY *= 0.94;
+        if (Math.abs(certVelocityY) < 0.0005) certVelocityY = certVelocityY > 0 ? 0.0005 : -0.0005;
+      }
+      
+      mainCarousel.rotation.y += certVelocityY; 
+      cloneCarouselOuter.rotation.y -= 0.0003; 
+      cloneCarouselInner.rotation.y += 0.0015;
+      
+      const t = Date.now() * 0.001;
+      [mainCarousel, cloneCarouselOuter, cloneCarouselInner].forEach(c => c.children.forEach(g => { 
+        g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
+      }));
+      
+      certRenderer.render(certScene, certCamera);
+    }
+
+    function openCertModal() {
+      const modal = document.getElementById('cert-3d-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => { 
+        modal.classList.remove('opacity-0'); 
+        initCert3D(); 
+        animateCert3D(); 
+      }, 10);
+    }
+    
+    function closeCertModal() {
+      const modal = document.getElementById('cert-3d-modal');
+      modal.classList.add('opacity-0');
+      setTimeout(() => { 
+        modal.classList.add('hidden'); 
+        cancelAnimationFrame(certAnimationId); 
+      }, 500);
+    }
   </script>
 </body>
 </html>
