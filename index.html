@@ -888,7 +888,7 @@
     
     // 用于控制粒子流体力学交互的鼠标与粒子系统变量
     let certParticles;
-    let certCloudParticles = []; // 新增体积星云数组
+    let certCloudParticles = []; 
     const particleCount = 3000;
     let certMouseX = 0, certMouseY = 0;
     let certWindowHalfX = window.innerWidth / 2;
@@ -921,8 +921,8 @@
         const ctx = canvas.getContext('2d');
         const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.6)');
-        gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.2)');
+        gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 512, 512);
@@ -931,22 +931,22 @@
       
       certCloudParticles = [];
       const nebulaTex = createNebulaTexture();
-      const cloudGeo = new THREE.PlaneGeometry(3500, 3500);
+      const cloudGeo = new THREE.PlaneGeometry(5000, 5000);
       const cloudColors = [0x00f0ff, 0x00f0ff, 0x00ff9d]; 
       
-      for(let i=0; i<10; i++) {
+      for(let i=0; i<12; i++) { 
         const cloudMat = new THREE.MeshBasicMaterial({
             map: nebulaTex,
             transparent: true,
-            opacity: 0.12,
+            opacity: 0.6, 
             blending: THREE.AdditiveBlending,
             depthWrite: false,
             color: cloudColors[i % cloudColors.length]
         });
         const cloud = new THREE.Mesh(cloudGeo, cloudMat);
-        const basePathX = (Math.random() - 0.5) * 3500;
-        const basePathY = (Math.random() - 0.5) * 3500;
-        cloud.position.set(basePathX, basePathY, (Math.random() - 0.5) * 1500 - 1500);
+        const basePathX = (Math.random() - 0.5) * 4000;
+        const basePathY = (Math.random() - 0.5) * 4000;
+        cloud.position.set(basePathX, basePathY, (Math.random() - 0.5) * 500 - 800);
         cloud.rotation.z = Math.random() * 2 * Math.PI;
         cloud.userData = {
             baseX: basePathX,
