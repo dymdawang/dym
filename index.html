@@ -8,14 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- 注入 OGL.js 超轻量 WebGL 引擎 -->
-  <script src="https://cdn.jsdelivr.net/npm/ogl@0.0.117/dist/ogl.umd.js"></script>
-  <script>
-    // 兼容 UMD 全局变量大小写映射，彻底杜绝 ogl is not defined 报错
-    if (typeof window.ogl === 'undefined' && typeof window.OGL !== 'undefined') {
-      window.ogl = window.OGL;
-    }
-  </script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
@@ -860,7 +852,18 @@
     // OGL 底层相关变量
     let oglRenderer, oglProgram, oglMesh, oglGl;
 
-    function initOGLBackground() {
+    async function initOGLBackground() {
+      // 动态导入 OGL 模块，彻底绕过 UMD 的全局变量污染与浏览器插件拦截
+      if (!window.oglAPI) {
+          try {
+              window.oglAPI = await import('https://cdn.jsdelivr.net/npm/ogl@0.0.117/dist/ogl.mjs');
+          } catch (e) {
+              console.error("[引擎提示] OGL 流体引擎加载失败，可能因网络波动。3D 展厅将继续使用纯净夜间背景进行渲染。", e);
+              return;
+          }
+      }
+      const ogl = window.oglAPI;
+
       const oglCanvas = document.getElementById('cert-ogl-canvas');
       oglRenderer = new ogl.Renderer({ canvas: oglCanvas, alpha: true, dpr: Math.min(window.devicePixelRatio, 2) });
       oglGl = oglRenderer.gl;
@@ -918,11 +921,11 @@
       resizeOGL();
     }
 
-    function initCert3D() {
+    async function initCert3D() {
       if (isCert3DReady) return;
       
-      // 初始化 OGL 流体底垫
-      initOGLBackground();
+      // 初始化 OGL 流体底垫（异步安全加载）
+      await initOGLBackground();
 
       const container = document.getElementById('cert-canvas-container');
       certScene = new THREE.Scene();
@@ -1076,8 +1079,8 @@
       certAnimationId = requestAnimationFrame(animateCert3D);
       const t = Date.now() * 0.001;
 
-      // --- OGL 流体渲染刷新 ---
-      if (oglProgram) {
+      // --- OGL 流体渲染刷新 (仅当模块成功加载时) ---
+      if (oglProgram && oglRenderer) {
           oglProgram.uniforms.uTime.value = t;
           oglProgram.uniforms.uMouse.value[0] += ((certMouseX / window.innerWidth + 0.5) - oglProgram.uniforms.uMouse.value[0]) * 0.05;
           oglProgram.uniforms.uMouse.value[1] += ((-certMouseY / window.innerHeight + 0.5) - oglProgram.uniforms.uMouse.value[1]) * 0.05;
@@ -1097,16 +1100,18 @@
         g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
       });
       
-      certRenderer.render(certScene, certCamera);
+      if(certScene && certCamera && certRenderer) {
+         certRenderer.render(certScene, certCamera);
+      }
     }
 
     function openCertModal() {
       const modal = document.getElementById('cert-3d-modal');
       modal.classList.remove('hidden');
-      setTimeout(() => { 
+      setTimeout(async () => { 
         modal.classList.remove('opacity-0'); 
-        initCert3D(); 
-        animateCert3D(); 
+        await initCert3D(); 
+        if (!certAnimationId) animateCert3D(); 
       }, 10);
     }
     
@@ -1116,6 +1121,7 @@
       setTimeout(() => { 
         modal.classList.add('hidden'); 
         cancelAnimationFrame(certAnimationId); 
+        certAnimationId = null;
       }, 500);
     }
   </script>
