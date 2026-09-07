@@ -885,6 +885,12 @@
     let certScene, certCamera, certRenderer, mainCarousel;
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
+    
+    // 用于控制粒子流体力学交互的鼠标变量
+    let certParticles;
+    let certMouseX = 0, certMouseY = 0;
+    let certWindowHalfX = window.innerWidth / 2;
+    let certWindowHalfY = window.innerHeight / 2;
 
     function initCert3D() {
       if (isCert3DReady) return;
@@ -904,6 +910,42 @@
 
       mainCarousel = new THREE.Group(); 
       certScene.add(mainCarousel); 
+
+      // --- 新增：深空流萤背景粒子系统 ---
+      const particleCount = 1500;
+      const particleGeo = new THREE.BufferGeometry();
+      const particlePos = new Float32Array(particleCount * 3);
+      const particleColors = new Float32Array(particleCount * 3);
+      const colorCyan = new THREE.Color(0x00f0ff);
+      const colorGreen = new THREE.Color(0x00ff9d);
+
+      for (let i = 0; i < particleCount; i++) {
+        // 随机在一个庞大的空间内生成，尽量布置在远景
+        particlePos[i * 3] = (Math.random() - 0.5) * 4000;
+        particlePos[i * 3 + 1] = (Math.random() - 0.5) * 4000;
+        particlePos[i * 3 + 2] = (Math.random() - 0.5) * 3000 - 1000; 
+        
+        // 混合 70% 赛博蓝, 30% 荧光绿
+        const mixedColor = Math.random() > 0.3 ? colorCyan : colorGreen;
+        particleColors[i * 3] = mixedColor.r;
+        particleColors[i * 3 + 1] = mixedColor.g;
+        particleColors[i * 3 + 2] = mixedColor.b;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+      particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+      const particleMat = new THREE.PointsMaterial({
+        size: 4,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      certParticles = new THREE.Points(particleGeo, particleMat);
+      certScene.add(certParticles);
+      // ---------------------------------
 
       const cardGeo = new THREE.ShapeGeometry((function(){
         const s = new THREE.Shape(), w=260, h=180, r=12, x=-w/2, y=-h/2;
@@ -992,9 +1034,16 @@
         certTargetVelocityY = 0; 
       };
       const onMove = e => { 
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        // 捕获鼠标屏幕中心差值（用于粒子视差位移）
+        certMouseX = clientX - certWindowHalfX;
+        certMouseY = clientY - certWindowHalfY;
+
         if(isCertDragging){ 
-          certTargetVelocityY = ((e.touches ? e.touches[0].clientX : e.clientX) - certPreviousX) * 0.0008; 
-          certPreviousX = e.touches ? e.touches[0].clientX : e.clientX; 
+          certTargetVelocityY = (clientX - certPreviousX) * 0.0008; 
+          certPreviousX = clientX; 
         } 
       };
       const onUp = () => isCertDragging = false;
@@ -1009,6 +1058,8 @@
       
       window.addEventListener('resize', () => {
         if(!isCert3DReady) return;
+        certWindowHalfX = window.innerWidth / 2;
+        certWindowHalfY = window.innerHeight / 2;
         certCamera.aspect = window.innerWidth / window.innerHeight; 
         certCamera.updateProjectionMatrix(); 
         certCamera.position.z = getCameraZ();
@@ -1032,6 +1083,16 @@
       mainCarousel.children.forEach(g => { 
         g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
       });
+
+      // --- 新增：粒子系统自转与鼠标流体视差 ---
+      if (certParticles) {
+        certParticles.rotation.y += 0.0003;
+        certParticles.rotation.x += 0.0001;
+        // 产生丝滑的空间排斥与景深跟随手感
+        certParticles.position.x += (certMouseX * 0.6 - certParticles.position.x) * 0.02;
+        certParticles.position.y += (-certMouseY * 0.6 - certParticles.position.y) * 0.02;
+      }
+      // ----------------------------------------
       
       certRenderer.render(certScene, certCamera);
     }
