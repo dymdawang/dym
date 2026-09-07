@@ -7,7 +7,6 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- 引入 Three.js 引擎核心 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -965,14 +964,26 @@
       const loader = new THREE.TextureLoader();
       let loaded = 0;
       
+      const checkLoadingComplete = () => {
+        loaded++;
+        if (loaded === realPhotos.length) {
+          document.getElementById('cert-loading').style.opacity = '0';
+        }
+      };
+
       realPhotos.forEach((url, idx) => {
-        loader.load(url, tex => {
-          if(mainMeshes[idx]) mainMeshes[idx].material = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
-          loaded++;
-          if (loaded === realPhotos.length) {
-            document.getElementById('cert-loading').style.opacity = '0';
+        loader.load(
+          url, 
+          tex => {
+            if(mainMeshes[idx]) mainMeshes[idx].material = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+            checkLoadingComplete();
+          },
+          undefined,
+          err => {
+            console.warn(`[引擎提示] 证书图片加载跳过: ${url}`);
+            checkLoadingComplete();
           }
-        });
+        );
       });
 
       const onDown = e => { 
