@@ -882,7 +882,7 @@
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
-    let certScene, certCamera, certRenderer, mainCarousel, cloneCarouselOuter, cloneCarouselInner;
+    let certScene, certCamera, certRenderer, mainCarousel;
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
 
@@ -903,11 +903,7 @@
       container.appendChild(certRenderer.domElement);
 
       mainCarousel = new THREE.Group(); 
-      cloneCarouselOuter = new THREE.Group(); 
-      cloneCarouselInner = new THREE.Group();
       certScene.add(mainCarousel); 
-      certScene.add(cloneCarouselOuter); 
-      certScene.add(cloneCarouselInner);
 
       const cardGeo = new THREE.ShapeGeometry((function(){
         const s = new THREE.Shape(), w=260, h=180, r=12, x=-w/2, y=-h/2;
@@ -916,8 +912,6 @@
         return s;
       })());
       
-      // 【核心修复区域：UV 坐标归一化重建】
-      // 解决 WebGL 将物理坐标错误当作纹理坐标导致单像素拉伸的问题
       cardGeo.computeBoundingBox();
       const bbox = cardGeo.boundingBox;
       const uvAttribute = cardGeo.attributes.uv;
@@ -930,7 +924,6 @@
       
       const edgeGeo = new THREE.EdgesGeometry(cardGeo);
       const mainMat = new THREE.LineBasicMaterial({ color: 0x55aa33, linewidth: 1, transparent: true, opacity: 0.8 });
-      const cloneMat = new THREE.LineBasicMaterial({ color: 0x113311, linewidth: 1, transparent: true, opacity: 0.2 });
 
       const mainMeshes = [];
       const rows = 3, cols = 9;
@@ -945,7 +938,7 @@
           const fSpeed = Math.random() * 1.5 + 0.5, fPhase = Math.random() * Math.PI * 2, fAmp = Math.random() * 6 + 4;
           const tiltZ = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.14 + 0.08);
 
-          const makeSlot = (parent, scale, posY, mat, opacity, borderMat) => {
+          const makeSlot = (parent, scale, posY, mat, borderMat) => {
             const grp = new THREE.Group(); 
             grp.position.copy(pos).multiplyScalar(scale); 
             grp.position.y = posY;
@@ -963,13 +956,10 @@
             return card;
           };
 
-          mainMeshes.push(makeSlot(mainCarousel, 1, pos.y, {color: 0x000000}, 1, mainMat));
-          makeSlot(cloneCarouselOuter, 1.1, pos.y * 1.1, {color: 0x010201, transparent: true, opacity: 0.3}, 0.3, cloneMat);
-          makeSlot(cloneCarouselInner, 0.5, pos.y * 0.5 + 300, {color: 0x010201, transparent: true, opacity: 0.1}, 0.1, cloneMat);
+          mainMeshes.push(makeSlot(mainCarousel, 1, pos.y, {color: 0x000000}, mainMat));
         }
       }
 
-      // 获取真实照片数据提取为扁平化的 27 张图片路径
       const realPhotos = certificateBatches.flatMap(b => b.images).map(img => `./images/${img}`);
       const loader = new THREE.TextureLoader();
       let loaded = 0;
@@ -1037,13 +1027,11 @@
       }
       
       mainCarousel.rotation.y += certVelocityY; 
-      cloneCarouselOuter.rotation.y -= 0.0003; 
-      cloneCarouselInner.rotation.y += 0.0015;
       
       const t = Date.now() * 0.001;
-      [mainCarousel, cloneCarouselOuter, cloneCarouselInner].forEach(c => c.children.forEach(g => { 
+      mainCarousel.children.forEach(g => { 
         g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
-      }));
+      });
       
       certRenderer.render(certScene, certCamera);
     }
