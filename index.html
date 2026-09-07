@@ -886,8 +886,9 @@
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
     
-    // 用于控制粒子流体力学交互的鼠标变量
+    // 用于控制粒子流体力学交互的鼠标与粒子系统变量
     let certParticles;
+    const particleCount = 3000;
     let certMouseX = 0, certMouseY = 0;
     let certWindowHalfX = window.innerWidth / 2;
     let certWindowHalfY = window.innerHeight / 2;
@@ -911,41 +912,48 @@
       mainCarousel = new THREE.Group(); 
       certScene.add(mainCarousel); 
 
-      // --- 新增：深空流萤背景粒子系统 ---
-      const particleCount = 1500;
+      // --- 火力全开版：高密度深空流萤背景与物理基底 ---
       const particleGeo = new THREE.BufferGeometry();
       const particlePos = new Float32Array(particleCount * 3);
+      const particleBasePos = new Float32Array(particleCount * 3);
       const particleColors = new Float32Array(particleCount * 3);
       const colorCyan = new THREE.Color(0x00f0ff);
       const colorGreen = new THREE.Color(0x00ff9d);
 
       for (let i = 0; i < particleCount; i++) {
-        // 随机在一个庞大的空间内生成，尽量布置在远景
-        particlePos[i * 3] = (Math.random() - 0.5) * 4000;
-        particlePos[i * 3 + 1] = (Math.random() - 0.5) * 4000;
-        particlePos[i * 3 + 2] = (Math.random() - 0.5) * 3000 - 1000; 
+        let px = (Math.random() - 0.5) * 4000;
+        let py = (Math.random() - 0.5) * 4000;
+        let pz = (Math.random() - 0.5) * 3000 - 1000;
         
-        // 混合 70% 赛博蓝, 30% 荧光绿
+        particlePos[i * 3] = px;
+        particlePos[i * 3 + 1] = py;
+        particlePos[i * 3 + 2] = pz;
+        
+        particleBasePos[i * 3] = px;
+        particleBasePos[i * 3 + 1] = py;
+        particleBasePos[i * 3 + 2] = pz;
+        
         const mixedColor = Math.random() > 0.3 ? colorCyan : colorGreen;
         particleColors[i * 3] = mixedColor.r;
         particleColors[i * 3 + 1] = mixedColor.g;
         particleColors[i * 3 + 2] = mixedColor.b;
       }
       particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+      particleGeo.setAttribute('basePosition', new THREE.BufferAttribute(particleBasePos, 3));
       particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
 
       const particleMat = new THREE.PointsMaterial({
-        size: 4,
+        size: 8, // 尺寸倍增，增强星光辨识度
         vertexColors: true,
         transparent: true,
-        opacity: 0.8,
+        opacity: 1.0, // 透明度拉满
         sizeAttenuation: true,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.AdditiveBlending, // 叠加发光
         depthWrite: false
       });
       certParticles = new THREE.Points(particleGeo, particleMat);
       certScene.add(certParticles);
-      // ---------------------------------
+      // ------------------------------------------------
 
       const cardGeo = new THREE.ShapeGeometry((function(){
         const s = new THREE.Shape(), w=260, h=180, r=12, x=-w/2, y=-h/2;
@@ -1037,7 +1045,6 @@
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        // 捕获鼠标屏幕中心差值（用于粒子视差位移）
         certMouseX = clientX - certWindowHalfX;
         certMouseY = clientY - certWindowHalfY;
 
@@ -1084,13 +1091,52 @@
         g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
       });
 
-      // --- 新增：粒子系统自转与鼠标流体视差 ---
+      // --- 火力全开版：CPU流体排斥运算 ---
       if (certParticles) {
-        certParticles.rotation.y += 0.0003;
-        certParticles.rotation.x += 0.0001;
-        // 产生丝滑的空间排斥与景深跟随手感
-        certParticles.position.x += (certMouseX * 0.6 - certParticles.position.x) * 0.02;
-        certParticles.position.y += (-certMouseY * 0.6 - certParticles.position.y) * 0.02;
+        const positions = certParticles.geometry.attributes.position.array;
+        const basePositions = certParticles.geometry.attributes.basePosition.array;
+
+        // 将鼠标坐标映射到近似的三维世界比例中
+        const targetX = (certMouseX / certWindowHalfX) * 2000;
+        const targetY = -(certMouseY / certWindowHalfY) * 2000;
+
+        for (let i = 0; i < particleCount; i++) {
+          let px = positions[i * 3];
+          let py = positions[i * 3 + 1];
+          
+          let bx = basePositions[i * 3];
+          let by = basePositions[i * 3 + 1];
+
+          // 粒子自身的缓动呼吸漂浮
+          let driftX = bx + Math.sin(t * 0.5 + by) * 100;
+          let driftY = by + Math.cos(t * 0.5 + bx) * 100;
+
+          // 鼠标物理排斥计算
+          let dx = px - targetX;
+          let dy = py - targetY;
+          let distSq = dx * dx + dy * dy;
+          let force = 0;
+          let repelRadius = 600; // 鼠标引力场范围
+
+          if (distSq < repelRadius * repelRadius) {
+            force = (repelRadius * repelRadius - distSq) / (repelRadius * repelRadius);
+            // 剧烈推开
+            px += (dx / Math.sqrt(distSq)) * force * 40;
+            py += (dy / Math.sqrt(distSq)) * force * 40;
+          }
+
+          // 弹性恢复（流体回潮感）
+          px += (driftX - px) * 0.05;
+          py += (driftY - py) * 0.05;
+
+          positions[i * 3] = px;
+          positions[i * 3 + 1] = py;
+        }
+        certParticles.geometry.attributes.position.needsUpdate = true;
+        
+        // 整体视差强化
+        certParticles.position.x += (certMouseX * 0.3 - certParticles.position.x) * 0.05;
+        certParticles.position.y += (-certMouseY * 0.3 - certParticles.position.y) * 0.05;
       }
       // ----------------------------------------
       
