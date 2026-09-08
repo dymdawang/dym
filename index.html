@@ -20,10 +20,14 @@
     
     html { scroll-behavior: smooth; }
 
+    /* === 已替换：将 4.png 作为全局固定背景直接挂载于 body === */
     body {
       font-family: 'Outfit', sans-serif;
-      /* 移除实体背景，让底部的水波纹容器透出来 */
-      background-color: transparent;
+      background-color: #080b1a;
+      background-image: url('./4.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
       color: white;
       overflow-x: hidden;
       margin: 0;
@@ -81,9 +85,6 @@
   </style>
 </head>
 <body>
-
-  <!-- 全局底层水波纹容器：固定不动 (fixed) -->
-  <div id="water-ripple-bg" class="fixed inset-0 w-full h-full z-[-1] bg-[#080b1a]" style="background-image: url('./4.png'); background-size: cover; background-position: center; background-attachment: fixed;"></div>
 
   <!-- 光标中心点与圆环 -->
   <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#e0ffff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
@@ -320,14 +321,15 @@
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎 -->
+  <!-- === 已替换：将水波纹引擎直接挂载于 body，提升渲染分辨率至 1024 === -->
   <script>
     $(document).ready(function() {
       try {
-        $('#water-ripple-bg').ripples({
-          resolution: 512,
+        $('body').ripples({
+          resolution: 1024,
           dropRadius: 20,
           perturbance: 0.04,
+          interactive: true
         });
       } catch (e) {
         console.error("Ripples engine initialization failed:", e);
