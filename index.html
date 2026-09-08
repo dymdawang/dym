@@ -321,15 +321,28 @@
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎：挂载到 body，分辨率设定为 800，突破底层事件拦截 -->
+  <!-- 初始化水波纹引擎：已加入 50ms 节流限制 + 12px 半径微调，彻底根除高频交互卡顿 -->
   <script>
     $(document).ready(function() {
       try {
-        $('body').ripples({
+        const $body = $('body');
+        $body.ripples({
           resolution: 800,
-          dropRadius: 20,
+          dropRadius: 12,       /* 优化：水波半径由 20 缩减至 12，减轻渲染面积 */
           perturbance: 0.04,
           interactive: true
+        });
+
+        // 优化：加入 50ms 节流阀，防止鼠标快速滑动时瞬间生成上百个波纹导致显卡过载
+        let lastDropTime = 0;
+        $body.on('mousemove.ripples-throttle', function(e) {
+          const now = Date.now();
+          if (now - lastDropTime > 50) {
+            lastDropTime = now;
+            try {
+              $body.ripples('drop', e.pageX, e.pageY, 12, 0.04);
+            } catch (err) {}
+          }
         });
       } catch (e) {
         console.error("Ripples engine initialization failed:", e);
@@ -480,7 +493,6 @@
           />
         ` : '';
 
-        // 还原 UI 为极客青/翠绿
         const mobilePrompt = (i === 0 || i === 1) 
           ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
           : '';
@@ -943,7 +955,7 @@
                         float glow = smoothstep(0.6, 0.0, dist) * hoverState; 
                         vec3 glowColor = vec3(0.88, 1.0, 1.0); 
                         
-                        // 修正：光晕强度压制至 0.35 解决刺眼问题
+                        // 光晕强度压制至 0.35
                         diffuseColor.rgb += glowColor * glow * 0.35; 
                     #endif
                     `
@@ -1070,7 +1082,6 @@
           matData.hoverState.value += (mesh.userData.targetHoverState - matData.hoverState.value) * 0.15;
 
           if (matData.hoverState.value > 0.01) {
-              // 修正：悬停时向正前方跃出
               mesh.position.z += (30 - mesh.position.z) * 0.15; 
               border.material.color.setHex(0xe0ffff);
               border.material.opacity = matData.hoverState.value;
