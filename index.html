@@ -93,7 +93,7 @@
     </div>
   </div>
 
-  <!-- 正式项目的 3D 证书弹窗（原生静态 3D 流体纵深云雾） -->
+  <!-- 正式项目的 3D 证书弹窗 -->
   <div id="cert-3d-modal" class="fixed inset-0 z-[100000] bg-[#04060e] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-500 font-mono touch-none overflow-hidden">
     <button id="cert-modal-close" onclick="closeCertModal()" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer z-[100001]">
       <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
@@ -328,7 +328,7 @@
 
     const CORE_COMPETENCIES = [
       { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
-      { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' }, // 保持原有证明材料图不变
+      { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
       { title: '科研与数据分析', desc: '具备独立展开个人科研实验的经验，能熟练掌握运用 AI 进行数据分析，撰写高质量学术论文及调研报告。', icon: 'line-chart' },
       { title: '多项 AI 认证', desc: '拿下过多项权威 AI 证书，证明了在人工智能领域的系统学习能力与前沿技术的跟进速度。', icon: 'award' }
     ];
@@ -836,7 +836,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染与静态原生流体云景深控制逻辑 -->
+  <!-- 3D 展厅渲染与 Shader 实时抠图引擎 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -881,10 +881,35 @@
               map: cloudTexture,
               color: Math.random() > 0.4 ? colorDarkTeal : colorDeepGreen,
               transparent: true,
-              blending: THREE.NormalBlending, // 透明度混合，杜绝过曝
+              blending: THREE.NormalBlending, // 正常混合模式
               opacity: opacityLevel, 
               depthWrite: false 
             });
+
+            // 【核心黑科技】：挂载 GLSL Shader 实时抠出实心图片的暗色背景
+            material.onBeforeCompile = (shader) => {
+              shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <map_fragment>',
+                `
+                #ifdef USE_MAP
+                  vec4 texelColor = texture2D( map, vUv );
+                  
+                  // 提取亮度作为蒙版基准
+                  float brightness = max(max(texelColor.r, texelColor.g), texelColor.b);
+                  
+                  // 利用平滑阶跃函数剔除暗紫色背景 (0.08以下全透明，0.4以上全显，中间平滑过渡)
+                  float alphaMask = smoothstep(0.08, 0.4, brightness);
+                  
+                  texelColor = mapTexelToLinear( texelColor );
+                  diffuseColor *= texelColor;
+                  
+                  // 强制覆盖 Alpha 通道
+                  diffuseColor.a *= alphaMask; 
+                #endif
+                `
+              );
+            };
+
             const sprite = new THREE.Sprite(material);
             
             const theta = Math.random() * Math.PI * 2;
@@ -912,10 +937,10 @@
           }
         }
 
-        // 前中后三层静态景深锁定
-        spawnClouds(70, 3000, {center: -1500, spread: 1000}, 0.35, 2.5); // 远景底云
-        spawnClouds(50, 2000, {center: -200, spread: 800}, 0.20, 1.8);   // 中景穿插
-        spawnClouds(25, 1200, {center: 900, spread: 500}, 0.10, 2.0);    // 前景薄雾极限压制
+        // 前中后三层静态景深排布
+        spawnClouds(70, 3000, {center: -1500, spread: 1000}, 0.45, 2.5); // 远景
+        spawnClouds(50, 2000, {center: -200, spread: 800}, 0.25, 1.8);   // 中景
+        spawnClouds(25, 1200, {center: 900, spread: 500}, 0.15, 2.0);    // 前景
       }, undefined, (err) => {
         console.warn("[引擎提示] ./3.png 加载失败，请检查路径。");
         document.getElementById('cert-loading').innerText = "TEXTURE LOAD ERROR";
@@ -986,9 +1011,6 @@
       
       const checkLoadingComplete = () => {
         loaded++;
-        if (loaded === realPhotos.length) {
-          // 证书贴图全部加载完毕
-        }
       };
 
       realPhotos.forEach((url, idx) => {
@@ -1061,7 +1083,6 @@
         g.position.y = g.userData.baseY + Math.sin(t * 1.0 + g.userData.floatPhase) * 6.0; 
       });
 
-      // 云层的微弱静态环境流动感
       clouds.forEach((sprite) => {
         sprite.material.rotation += sprite.userData.rotationSpeed;
         sprite.material.opacity = sprite.userData.baseOpacity * (0.8 + Math.sin(t * 0.5 + sprite.userData.phase) * 0.2);
