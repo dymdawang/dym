@@ -835,7 +835,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染：纯黑深渊 + 亮青白粒子 + Shader 光学透镜交互 -->
+  <!-- 3D 展厅渲染：纯黑深渊 + 4000 亮青白粒子 + Raycaster 磁吸悬浮 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -843,16 +843,11 @@
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
     
-    // 核心 Shader 全局变量
-    const globalUniforms = {
-      uMouse: { value: new THREE.Vector2(-1, -1) },
-      uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      uClickPos: { value: new THREE.Vector2(-1, -1) },
-      uClickTime: { value: -100.0 },
-      uTime: { value: 0.0 }
-    };
-
-    let particleMesh; // 亮青白深空粒子群
+    // 全新物理射线捕获引擎
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(-1, -1);
+    let particleMesh; 
+    let mainMeshes = []; // 存储所有卡片用于射线检测
 
     function initCert3D() {
       if (isCert3DReady) return;
@@ -872,26 +867,32 @@
       certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(certRenderer.domElement);
 
+      // 环境光 + 摄像机聚光灯，确保纯黑环境下证书反光质感极佳
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
       certScene.add(ambientLight);
+      
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
+      dirLight.position.set(0, 0, 1);
+      certCamera.add(dirLight); // 灯光跟随摄像机
+      certScene.add(certCamera);
 
       document.getElementById('cert-loading').style.opacity = '0';
 
       // ==========================================
-      // 背景模块：亮青白色深空粒子 (建议二)
+      // 背景模块：4000 个亮青白色深空粒子 (高密度版)
       // ==========================================
       const particleGeo = new THREE.BufferGeometry();
-      const particleCount = 800; // 数量适中
+      const particleCount = 4000; 
       const posArray = new Float32Array(particleCount * 3);
       for(let i = 0; i < particleCount * 3; i++) {
         posArray[i] = (Math.random() - 0.5) * 4500; 
       }
       particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
       const particleMat = new THREE.PointsMaterial({
-        size: 3.0,
+        size: 2.5,
         color: 0xaaffff, // 亮青白色，提亮质感
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.8,
         blending: THREE.AdditiveBlending,
         fog: true
       });
@@ -899,7 +900,7 @@
       certScene.add(particleMesh);
 
       // ==========================================
-      // 证书阵列与 Shader 光学透镜/波纹模块
+      // 证书阵列结构构建
       // ==========================================
       mainCarousel = new THREE.Group(); 
       certScene.add(mainCarousel); 
@@ -921,7 +922,7 @@
       }
       uvAttribute.needsUpdate = true;
       const edgeGeo = new THREE.EdgesGeometry(cardGeo);
-      const mainMeshes = [];
+      mainMeshes = [];
       const rows = 3, cols = 9;
       
       for (let i = 0; i < rows; i++) {
@@ -937,96 +938,38 @@
             const grp = new THREE.Group(); 
             grp.position.copy(pos).multiplyScalar(scale); 
             grp.position.y = posY;
+            // 组的局部 Z 轴将指向圆柱体内部
             grp.lookAt(grp.position.clone().add(grp.position.clone().normalize()));
             grp.userData = { baseY: posY, floatSpeed: fSpeed, floatPhase: fPhase, floatAmplitude: fAmp * scale };
             
-            const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5, metalness: 0.1, side: THREE.DoubleSide });
+            // 使用原生 Standard 材质，剔除所有可能引发坐标偏移的自定义 Shader
+            const mat = new THREE.MeshStandardMaterial({ 
+              color: 0x222222, 
+              roughness: 0.5, 
+              metalness: 0.1, 
+              side: THREE.DoubleSide 
+            });
             
-            // 核心 Shader 注入：光影折射与触控波纹
-            mat.onBeforeCompile = (shader) => {
-              shader.uniforms.uMouse = globalUniforms.uMouse;
-              shader.uniforms.uResolution = globalUniforms.uResolution;
-              shader.uniforms.uClickPos = globalUniforms.uClickPos;
-              shader.uniforms.uClickTime = globalUniforms.uClickTime;
-              shader.uniforms.uTime = globalUniforms.uTime;
-
-              shader.fragmentShader = `
-                uniform vec2 uMouse;
-                uniform vec2 uResolution;
-                uniform vec2 uClickPos;
-                uniform float uClickTime;
-                uniform float uTime;
-                ${shader.fragmentShader}
-              `.replace(
-                `#include <map_fragment>`,
-                `
-                #ifdef USE_MAP
-                  vec2 currentPos = gl_FragCoord.xy / uResolution.xy;
-                  float aspect = uResolution.x / uResolution.y;
-                  
-                  // 计算鼠标与点击位置的距离
-                  vec2 diffMouse = currentPos - uMouse;
-                  diffMouse.x *= aspect;
-                  float distToMouse = length(diffMouse);
-
-                  vec2 diffClick = currentPos - uClickPos;
-                  diffClick.x *= aspect;
-                  float distToClick = length(diffClick);
-
-                  float uLensRadius = 0.15; // 选项 B: 中等透镜口径
-                  vec2 distortedUv = vUv;
-                  float lensGlow = 0.0;
-                  float rippleGlow = 0.0;
-
-                  // 1. PC 端隐形晶体透镜 (折射鼓包 + 焦散)
-                  if (uMouse.x > -0.5 && distToMouse < uLensRadius) {
-                      float smoothDist = smoothstep(uLensRadius, 0.0, distToMouse);
-                      vec2 dir = normalize(diffMouse); 
-                      distortedUv -= dir * smoothDist * 0.06; // 折射率
-                      lensGlow = smoothstep(uLensRadius * 0.85, uLensRadius, distToMouse) * smoothstep(uLensRadius * 1.05, uLensRadius, distToMouse);
-                  }
-
-                  // 2. 移动端 (方案 B) 晶体波纹点按反馈
-                  float timeElapsed = uTime - uClickTime;
-                  if (timeElapsed > 0.0 && timeElapsed < 1.0) {
-                      float currentRadius = timeElapsed * 0.4;
-                      float ringWidth = 0.03 + (timeElapsed * 0.02);
-                      float distFromRing = abs(distToClick - currentRadius);
-                      if(distFromRing < ringWidth) {
-                          rippleGlow = smoothstep(ringWidth, 0.0, distFromRing) * (1.0 - timeElapsed);
-                          vec2 dir = normalize(diffClick);
-                          distortedUv -= dir * 0.04 * (1.0 - timeElapsed); // 物理涟漪扭曲
-                      }
-                  }
-
-                  vec4 sampledDiffuseColor = texture2D( map, distortedUv );
-                  
-                  // 注入高光色彩 (亮青白色)
-                  vec3 causticColor = vec3(0.66, 1.0, 1.0); 
-                  sampledDiffuseColor.rgb += causticColor * lensGlow * 0.9;
-                  sampledDiffuseColor.rgb += causticColor * rippleGlow * 1.5;
-
-                  diffuseColor *= sampledDiffuseColor;
-                #endif
-                `
-              );
-            };
-
             const card = new THREE.Mesh(cardGeo, mat);
             const border = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.6 }));
+            
+            // 将边框和悬停状态存入 card 的 userData，以便在动画循环中进行物理驱动
+            card.userData = { border: border, isHovered: false };
             
             card.rotation.z = border.rotation.z = tiltZ;
             grp.add(card); 
             grp.add(border); 
             grp.scale.setScalar(scale); 
             parent.add(grp); 
+            
+            mainMeshes.push(card);
             return card;
           };
-          mainMeshes.push(makeSlot(mainCarousel, 1, pos.y));
+          makeSlot(mainCarousel, 1, pos.y);
         }
       }
 
-      // 异步加载原有的证书图片 (GitHub 生产环境路径)
+      // 异步加载原有的证书图片
       const realPhotos = certificateBatches.flatMap(b => b.images).map(img => `./images/${img}`);
       const loader = new THREE.TextureLoader();
       realPhotos.forEach((url, idx) => {
@@ -1040,7 +983,7 @@
       });
 
       // ==========================================
-      // 交互事件监听
+      // 原生 3D 物理交互事件监听 (0% 偏移率)
       // ==========================================
       const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
       
@@ -1059,29 +1002,22 @@
           certPreviousX = clientX; 
         } 
         
-        // PC端：实时更新隐形透镜中心系
+        // 更新物理射线的 2D 归一化设备坐标
         if(!isMobileDevice) {
-           globalUniforms.uMouse.value.set(clientX / window.innerWidth, 1.0 - (clientY / window.innerHeight));
+           mouse.x = (clientX / window.innerWidth) * 2 - 1;
+           mouse.y = -(clientY / window.innerHeight) * 2 + 1;
         }
       };
       
       const onUp = () => { isCertDragging = false; };
-      
-      // 点击波纹触发器
-      const onClick = e => {
-         // 在手机端或 PC 端点击均触发晶体涟漪反馈
-         globalUniforms.uClickPos.value.set(e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight));
-         globalUniforms.uClickTime.value = globalUniforms.uTime.value;
-      };
 
       container.addEventListener('mousedown', onDown); 
       container.addEventListener('mousemove', onMove); 
       container.addEventListener('mouseup', onUp); 
       container.addEventListener('mouseleave', () => { 
           onUp(); 
-          globalUniforms.uMouse.value.set(-1, -1); // 移出屏幕时关闭透镜
+          mouse.set(-1, -1); // 移出屏幕时关闭射线锁定
       });
-      container.addEventListener('click', onClick);
 
       container.addEventListener('touchstart', onDown, {passive: false}); 
       container.addEventListener('touchmove', onMove, {passive: false}); 
@@ -1089,7 +1025,6 @@
       
       window.addEventListener('resize', () => {
         if(!isCert3DReady) return;
-        globalUniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
         certCamera.aspect = window.innerWidth / window.innerHeight; 
         certCamera.updateProjectionMatrix(); 
         certCamera.position.z = getCameraZ();
@@ -1101,8 +1036,8 @@
     function animateCert3D() {
       certAnimationId = requestAnimationFrame(animateCert3D);
       const t = Date.now() * 0.001;
-      globalUniforms.uTime.value = t; // 更新 Shader 时间轴
 
+      // 1. 物理惯性旋转与浮动
       if (isCertDragging) {
         certVelocityY = certTargetVelocityY;
       } else {
@@ -1115,12 +1050,47 @@
         g.position.y = g.userData.baseY + Math.sin(t * 1.0 + g.userData.floatPhase) * 6.0; 
       });
 
-      // 亮青白深空粒子缓慢漂移
+      // 2. 高密度星空微弱自转
       if (particleMesh) {
           particleMesh.rotation.y = t * 0.03;
           particleMesh.rotation.z = t * 0.01;
       }
+
+      // 3. 核心黑科技：Raycaster 磁吸交互引擎 (完全解决坐标错位)
+      if (!isMobileDevice && certCamera) {
+          raycaster.setFromCamera(mouse, certCamera);
+          const intersects = raycaster.intersectObjects(mainMeshes);
+
+          // 重置所有卡片的悬停状态
+          mainMeshes.forEach(m => m.userData.isHovered = false);
+
+          // 当且仅当鼠标指向目标且没有在大幅度拖拽时，触发磁吸悬浮
+          if (intersects.length > 0 && !isCertDragging) {
+              intersects[0].object.userData.isHovered = true;
+          }
+      }
+
+      // 4. 应用磁吸物理阻尼动画
+      mainMeshes.forEach(mesh => {
+          const border = mesh.userData.border;
+          if (mesh.userData.isHovered) {
+              // 悬停：向摄像机方向（局部 -Z 轴）弹出，并触发极客高亮
+              mesh.position.z += (-40 - mesh.position.z) * 0.15;
+              mesh.material.emissive.setHex(0x004433);
+              border.material.color.setHex(0x00ff9d);
+              border.material.opacity = 1.0;
+          } else {
+              // 恢复：平滑退回原位，恢复暗冷色调
+              mesh.position.z += (0 - mesh.position.z) * 0.1;
+              mesh.material.emissive.setHex(0x000000);
+              border.material.color.setHex(0x888888);
+              border.material.opacity = 0.6;
+          }
+          // 边框始终与卡片本体深度保持一致
+          border.position.z = mesh.position.z;
+      });
       
+      // 5. 执行渲染
       if(certScene && certCamera && certRenderer) {
          certRenderer.render(certScene, certCamera);
       }
