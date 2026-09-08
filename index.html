@@ -34,11 +34,13 @@
 
     body.hero-mode #cursor-dot { background-color: #ffffff !important; }
     body.hero-mode #cursor-ring { border-color: rgba(255, 255, 255, 0.5) !important; }
+    
+    /* === 已修复：选项 B 冰川冷白交互光标 === */
     #cursor-ring.cursor-hover {
       width: 48px !important;
       height: 48px !important;
-      background-color: rgba(0, 240, 255, 0.1) !important;
-      border-color: rgba(0, 240, 255, 0.8) !important;
+      background-color: rgba(224, 255, 255, 0.1) !important;
+      border-color: rgba(224, 255, 255, 0.8) !important;
     }
     body.hero-mode #cursor-ring.cursor-hover {
       background-color: rgba(255, 255, 255, 0.1) !important;
@@ -93,7 +95,6 @@
     </div>
   </div>
 
-  <!-- 正式项目的 3D 证书弹窗 -->
   <div id="cert-3d-modal" class="fixed inset-0 z-[100000] bg-[#04060e] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-500 font-mono touch-none overflow-hidden">
     <button id="cert-modal-close" onclick="closeCertModal()" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer z-[100001]">
       <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
@@ -843,6 +844,9 @@
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
     
+    // === 已修复：全局声明，解决 ReferenceError 作用域报错 ===
+    let isMobileDevice = false;
+    
     // 全新物理射线捕获引擎
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-1, -1);
@@ -985,7 +989,7 @@
       // ==========================================
       // 原生 3D 物理交互事件监听 (0% 偏移率)
       // ==========================================
-      const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
+      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent); // 初始化设备状态
       
       const onDown = e => { 
         isCertDragging = true; 
