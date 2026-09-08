@@ -20,11 +20,11 @@
     
     html { scroll-behavior: smooth; }
 
-    /* === 已替换：将 4.png 作为全局固定背景直接挂载于 body === */
+    /* 全局背景挂载 4.jpg，固定视差水底 */
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #080b1a;
-      background-image: url('./4.png');
+      background-image: url('./4.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -172,8 +172,8 @@
   </nav>
 
   <main>
-    <section id="hero-container" class="relative h-[300vh] bg-[#080b1a]">
-      <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-[#080b1a]">
+    <section id="hero-container" class="relative h-[300vh] bg-transparent">
+      <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center">
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover"></video>
@@ -321,12 +321,12 @@
     </div>
   </footer>
 
-  <!-- === 已替换：将水波纹引擎直接挂载于 body，提升渲染分辨率至 1024 === -->
+  <!-- 初始化水波纹引擎：挂载到 body，分辨率设定为 800，突破底层事件拦截 -->
   <script>
     $(document).ready(function() {
       try {
         $('body').ripples({
-          resolution: 1024,
+          resolution: 800,
           dropRadius: 20,
           perturbance: 0.04,
           interactive: true
@@ -480,7 +480,7 @@
           />
         ` : '';
 
-        // UI还原为翠绿
+        // 还原 UI 为极客青/翠绿
         const mobilePrompt = (i === 0 || i === 1) 
           ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
           : '';
@@ -812,7 +812,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染：纯黑深渊 + 9000星尘 + 玻璃拟态降噪反光 + 向前浮动 -->
+  <!-- 3D 展厅渲染：纯黑深渊 + 9000星尘 + 玻璃拟态降噪反光 + 向前跃出修正 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -943,7 +943,7 @@
                         float glow = smoothstep(0.6, 0.0, dist) * hoverState; 
                         vec3 glowColor = vec3(0.88, 1.0, 1.0); 
                         
-                        // 光晕强度下调至 0.35 解决刺眼问题
+                        // 修正：光晕强度压制至 0.35 解决刺眼问题
                         diffuseColor.rgb += glowColor * glow * 0.35; 
                     #endif
                     `
@@ -1070,7 +1070,8 @@
           matData.hoverState.value += (mesh.userData.targetHoverState - matData.hoverState.value) * 0.15;
 
           if (matData.hoverState.value > 0.01) {
-              mesh.position.z += (30 - mesh.position.z) * 0.15; // 保持向前方跃出
+              // 修正：悬停时向正前方跃出
+              mesh.position.z += (30 - mesh.position.z) * 0.15; 
               border.material.color.setHex(0xe0ffff);
               border.material.opacity = matData.hoverState.value;
           } else {
