@@ -32,19 +32,19 @@
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
     #cert-3d-modal, #cert-3d-modal * { cursor: auto !important; }
 
+    /* === 全局冰川冷白光标优化 === */
     body.hero-mode #cursor-dot { background-color: #ffffff !important; }
     body.hero-mode #cursor-ring { border-color: rgba(255, 255, 255, 0.5) !important; }
     
-    /* === 已修复：选项 B 冰川冷白交互光标 === */
     #cursor-ring.cursor-hover {
-      width: 48px !important;
-      height: 48px !important;
-      background-color: rgba(224, 255, 255, 0.1) !important;
-      border-color: rgba(224, 255, 255, 0.8) !important;
+      width: 32px !important;  /* 尺寸收敛至精致的 32px */
+      height: 32px !important;
+      background-color: rgba(224, 255, 255, 0.15) !important;
+      border-color: rgba(224, 255, 255, 0.9) !important;
     }
     body.hero-mode #cursor-ring.cursor-hover {
-      background-color: rgba(255, 255, 255, 0.1) !important;
-      border-color: rgba(255, 255, 255, 0.8) !important;
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      border-color: rgba(255, 255, 255, 0.9) !important;
     }
 
     .sci-fi-font {
@@ -70,7 +70,7 @@
     @keyframes heroFadeIn { from { opacity: 0; filter: blur(15px); } to { opacity: 1; filter: blur(0); } }
     .hero-img-load { animation: heroFadeIn 1.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
 
-    .nav-active { color: white !important; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+    .nav-active { color: white !important; text-shadow: 0 0 10px rgba(224,255,255,0.6); }
     .nav-active span { width: 100% !important; }
     
     .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
@@ -80,8 +80,9 @@
 </head>
 <body>
 
-  <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#00f0ff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
-  <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#00f0ff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
+  <!-- 光标中心点与圆环色值替换为 #e0ffff -->
+  <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#e0ffff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
+  <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#e0ffff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
 
   <div id="mobile-lightbox" class="fixed inset-0 z-[99999] bg-[#080b1a]/95 backdrop-blur-xl hidden flex-col items-center justify-center opacity-0 transition-opacity duration-300">
     <button id="lightbox-close-btn" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer">
@@ -89,9 +90,9 @@
     </button>
     <div class="w-full max-w-[90vw] h-full max-h-[80vh] flex items-center justify-center relative pointer-events-none">
       <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center z-[-1]">
-         <span class="w-10 h-10 rounded-full border-4 border-white/10 border-t-[#00f0ff] animate-spin"></span>
+         <span class="w-10 h-10 rounded-full border-4 border-white/10 border-t-[#e0ffff] animate-spin"></span>
       </div>
-      <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-[0_0_40px_rgba(0,240,255,0.2)] scale-95 transition-all duration-300 opacity-0 pointer-events-auto" onload="this.classList.remove('opacity-0'); document.getElementById('lightbox-loader').style.display='none';" />
+      <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-[0_0_40px_rgba(224,255,255,0.2)] scale-95 transition-all duration-300 opacity-0 pointer-events-auto" onload="this.classList.remove('opacity-0'); document.getElementById('lightbox-loader').style.display='none';" />
     </div>
   </div>
 
@@ -194,7 +195,7 @@
             重庆邮电大学 · 通信工程本科
           </h2>
           <div class="inline-flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 mt-2 md:mt-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transform hover:scale-105 transition-transform duration-300">
-            <span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#00f0ff] animate-pulse shrink-0"></span>
+            <span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#e0ffff] animate-pulse shrink-0"></span>
             <span class="text-xs sm:text-sm md:text-lg font-bold tracking-widest text-gray-200 leading-none mt-0.5">
               <span class="text-gray-400 mr-1 md:mr-2">求职方向：</span>研发 / AIGC / 管培生
             </span>
@@ -220,7 +221,7 @@
     </section>
 
     <section id="about" class="py-16 md:py-24 relative overflow-hidden bg-transparent">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#00f0ff]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none max-w-[100vw]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#e0ffff]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none max-w-[100vw]"></div>
       <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           <div class="cursor-default">
@@ -459,14 +460,14 @@
         ` : '';
 
         const mobilePrompt = (i === 0 || i === 1) 
-          ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
+          ? `<div class="mt-2 text-[#e0ffff] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
           : '';
 
         const actionBtn = (i === CORE_COMPETENCIES.length - 1)
           ? `<span onclick="event.stopPropagation(); openCertModal();" class="ml-2 relative group/btn inline-flex items-center cursor-pointer pointer-events-auto">
-               <span class="text-[#00ff9d] text-xs font-bold tracking-widest transition-colors duration-300 group-hover/btn:text-white relative z-10">点击查看</span>
-               <span class="absolute bottom-[-2px] left-0 w-full h-[1px] bg-[#00ff9d]/30 overflow-hidden">
-                 <span class="absolute top-0 -left-full w-full h-full bg-[#00ff9d] transition-all duration-300 ease-out group-hover/btn:left-0"></span>
+               <span class="text-[#e0ffff] text-xs font-bold tracking-widest transition-colors duration-300 group-hover/btn:text-white relative z-10">点击查看</span>
+               <span class="absolute bottom-[-2px] left-0 w-full h-[1px] bg-[#e0ffff]/30 overflow-hidden">
+                 <span class="absolute top-0 -left-full w-full h-full bg-[#e0ffff] transition-all duration-300 ease-out group-hover/btn:left-0"></span>
                </span>
              </span>`
           : '';
@@ -481,7 +482,7 @@
           ${floatImgHTML}
           
           <div class="relative z-10 flex flex-col h-full pointer-events-none">
-            <div class="w-12 h-12 md:w-14 md:h-14 mb-4 md:mb-6 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#00f0ff] group-hover:scale-110 transition-transform duration-500">
+            <div class="w-12 h-12 md:w-14 md:h-14 mb-4 md:mb-6 rounded-2xl bg-[#1a1f3c] border border-white/10 flex items-center justify-center text-[#e0ffff] group-hover:scale-110 transition-transform duration-500">
                 <i data-lucide="${comp.icon}" class="w-6 h-6 md:w-7 md:h-7"></i>
             </div>
             <div>
@@ -534,24 +535,24 @@
 
       const experienceHTML = EXPERIENCES.map((exp, i) => `
         <div class="reveal group relative p-6 md:p-10 rounded-3xl bg-white/5 border-l-2 md:border-l border-white/10 md:border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default ${i % 2 !== 0 ? 'reveal-delay-1' : ''}">
-          <div class="absolute -left-[5px] md:left-0 top-10 md:top-auto md:hidden w-3 h-3 rounded-full bg-[#080b1a] border-2 border-[#00f0ff] z-20"></div>
+          <div class="absolute -left-[5px] md:left-0 top-10 md:top-auto md:hidden w-3 h-3 rounded-full bg-[#080b1a] border-2 border-[#e0ffff] z-20"></div>
           
           <div class="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
             <div class="absolute -top-12 -right-12 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[#00f0ff]/10 to-[#00ff9d]/10 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
           </div>
           <div class="relative z-10 md:grid md:grid-cols-12 md:gap-8 items-start pl-2 md:pl-0">
             <div class="md:col-span-4 mb-5 md:mb-0">
-              <div class="hidden md:inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#1a1f3c] border border-white/10 text-[#00f0ff] mb-6 group-hover:scale-110 transition-transform duration-500">
+              <div class="hidden md:inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#1a1f3c] border border-white/10 text-[#e0ffff] mb-6 group-hover:scale-110 transition-transform duration-500">
                   <i data-lucide="folder-git-2" class="w-6 h-6"></i>
               </div>
               <h3 class="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 leading-tight">${exp.title}</h3>
-              <p class="text-[#00ff9d] text-xs md:text-sm font-semibold tracking-wide inline-block px-3 py-1 bg-[#00ff9d]/10 rounded-full">${exp.role}</p>
+              <p class="text-[#e0ffff] text-xs md:text-sm font-semibold tracking-wide inline-block px-3 py-1 bg-[#e0ffff]/10 rounded-full">${exp.role}</p>
             </div>
             <div class="md:col-span-8 relative">
               <ul class="space-y-3 md:space-y-4">
                 ${exp.bullets.map(bullet => `
                   <li class="flex items-start gap-2 md:gap-3 text-gray-400 font-light text-sm md:text-base leading-relaxed">
-                    <i data-lucide="check-circle-2" class="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-[#00f0ff] shrink-0 opacity-70"></i>
+                    <i data-lucide="check-circle-2" class="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-[#e0ffff] shrink-0 opacity-70"></i>
                     <span>${bullet}</span>
                   </li>
                 `).join('')}
@@ -633,13 +634,13 @@
 
         ambCtx.globalCompositeOperation = 'screen';
         const gradCyan = ambCtx.createRadialGradient(cyanX, cyanY, 0, cyanX, cyanY, 600);
-        gradCyan.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
-        gradCyan.addColorStop(1, 'rgba(0, 240, 255, 0)');
+        gradCyan.addColorStop(0, 'rgba(224, 255, 255, 0.15)'); // 更换为冰川冷白
+        gradCyan.addColorStop(1, 'rgba(224, 255, 255, 0)');
         ambCtx.fillStyle = gradCyan;
         ambCtx.fillRect(0, 0, ambWidth, ambHeight);
 
         const gradGreen = ambCtx.createRadialGradient(greenX, greenY, 0, greenX, greenY, 600);
-        gradGreen.addColorStop(0, 'rgba(0, 255, 157, 0.2)');
+        gradGreen.addColorStop(0, 'rgba(0, 255, 157, 0.1)'); // 轻微的冷绿色保留极客感
         gradGreen.addColorStop(1, 'rgba(0, 255, 157, 0)');
         ambCtx.fillStyle = gradGreen;
         ambCtx.fillRect(0, 0, ambWidth, ambHeight);
@@ -836,7 +837,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染：纯黑深渊 + 4000 亮青白粒子 + Raycaster 磁吸悬浮 -->
+  <!-- 3D 展厅渲染：纯黑深渊 + 9000星尘 + 玻璃拟态(Glassmorphism)鼠标跟随光晕 + 向前浮动 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -844,14 +845,13 @@
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
     
-    // === 已修复：全局声明，解决 ReferenceError 作用域报错 ===
-    let isMobileDevice = false;
+    let isMobileDevice = false; // 已修复：全局声明避免作用域报错
     
-    // 全新物理射线捕获引擎
+    // 全新物理射线捕获引擎，完美解决坐标偏移
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-1, -1);
     let particleMesh; 
-    let mainMeshes = []; // 存储所有卡片用于射线检测
+    let mainMeshes = []; 
 
     function initCert3D() {
       if (isCert3DReady) return;
@@ -859,7 +859,7 @@
       const container = document.getElementById('cert-canvas-container');
       certScene = new THREE.Scene();
       
-      // 1. 绝对纯黑的底层宇宙 (杜绝杂色)
+      // 1. 绝对纯黑的底层宇宙
       certScene.fog = new THREE.FogExp2(0x04060e, 0.0004); 
       
       const getCameraZ = () => (window.innerWidth / window.innerHeight < 1.2 ? 1850 * (1.2 / (window.innerWidth / window.innerHeight)) : 1850);
@@ -871,22 +871,20 @@
       certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(certRenderer.domElement);
 
-      // 环境光 + 摄像机聚光灯，确保纯黑环境下证书反光质感极佳
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
       certScene.add(ambientLight);
-      
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
       dirLight.position.set(0, 0, 1);
-      certCamera.add(dirLight); // 灯光跟随摄像机
+      certCamera.add(dirLight);
       certScene.add(certCamera);
 
       document.getElementById('cert-loading').style.opacity = '0';
 
       // ==========================================
-      // 背景模块：4000 个亮青白色深空粒子 (高密度版)
+      // 背景模块：9000 个亮青白色深空粒子 (星海爆发版)
       // ==========================================
       const particleGeo = new THREE.BufferGeometry();
-      const particleCount = 4000; 
+      const particleCount = 9000; 
       const posArray = new Float32Array(particleCount * 3);
       for(let i = 0; i < particleCount * 3; i++) {
         posArray[i] = (Math.random() - 0.5) * 4500; 
@@ -894,7 +892,7 @@
       particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
       const particleMat = new THREE.PointsMaterial({
         size: 2.5,
-        color: 0xaaffff, // 亮青白色，提亮质感
+        color: 0xaaffff,
         transparent: true,
         opacity: 0.8,
         blending: THREE.AdditiveBlending,
@@ -904,7 +902,7 @@
       certScene.add(particleMesh);
 
       // ==========================================
-      // 证书阵列结构构建
+      // 证书阵列与核心 Shader 光晕系统
       // ==========================================
       mainCarousel = new THREE.Group(); 
       certScene.add(mainCarousel); 
@@ -916,6 +914,7 @@
         return s;
       })());
       
+      // 为精确计算光晕坐标，预置 UV 映射
       cardGeo.computeBoundingBox();
       const bbox = cardGeo.boundingBox;
       const uvAttribute = cardGeo.attributes.uv;
@@ -942,23 +941,58 @@
             const grp = new THREE.Group(); 
             grp.position.copy(pos).multiplyScalar(scale); 
             grp.position.y = posY;
-            // 组的局部 Z 轴将指向圆柱体内部
             grp.lookAt(grp.position.clone().add(grp.position.clone().normalize()));
             grp.userData = { baseY: posY, floatSpeed: fSpeed, floatPhase: fPhase, floatAmplitude: fAmp * scale };
             
-            // 使用原生 Standard 材质，剔除所有可能引发坐标偏移的自定义 Shader
+            // 基础材质设定，偏深色调以便凸显高光
             const mat = new THREE.MeshStandardMaterial({ 
-              color: 0x222222, 
-              roughness: 0.5, 
-              metalness: 0.1, 
+              color: 0x111111, 
+              roughness: 0.4, 
+              metalness: 0.2, 
               side: THREE.DoubleSide 
             });
+
+            // 玻璃质感动态光晕核心参数
+            mat.userData = {
+                hoverUV: { value: new THREE.Vector2(0.5, 0.5) }, // 记录射线精确触点
+                hoverState: { value: 0.0 } // 控制光晕透明度
+            };
+
+            // 动态注入玻璃拟态光源 Shader
+            mat.onBeforeCompile = (shader) => {
+                shader.uniforms.hoverUV = mat.userData.hoverUV;
+                shader.uniforms.hoverState = mat.userData.hoverState;
+                shader.fragmentShader = `
+                    uniform vec2 hoverUV;
+                    uniform float hoverState;
+                    ${shader.fragmentShader}
+                `.replace(
+                    `#include <map_fragment>`,
+                    `
+                    #include <map_fragment>
+                    #ifdef USE_MAP
+                        // 根据卡片比例(260/180 ≈ 1.444)校正距离计算，保证光晕正圆
+                        vec2 aspectUV = vUv;
+                        aspectUV.x *= 1.444; 
+                        vec2 aspectHoverUV = hoverUV;
+                        aspectHoverUV.x *= 1.444;
+                        
+                        float dist = distance(aspectUV, aspectHoverUV);
+                        // 绘制跟随鼠标的柔和径向渐变光晕 (半径 0.6)
+                        float glow = smoothstep(0.6, 0.0, dist) * hoverState; 
+                        vec3 glowColor = vec3(0.88, 1.0, 1.0); // 冰川冷白
+                        
+                        // 与底图叠加发光效果
+                        diffuseColor.rgb += glowColor * glow * 1.5; 
+                    #endif
+                    `
+                );
+            };
             
             const card = new THREE.Mesh(cardGeo, mat);
             const border = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.6 }));
             
-            // 将边框和悬停状态存入 card 的 userData，以便在动画循环中进行物理驱动
-            card.userData = { border: border, isHovered: false };
+            card.userData = { border: border, targetHoverState: 0.0 };
             
             card.rotation.z = border.rotation.z = tiltZ;
             grp.add(card); 
@@ -973,7 +1007,6 @@
         }
       }
 
-      // 异步加载原有的证书图片
       const realPhotos = certificateBatches.flatMap(b => b.images).map(img => `./images/${img}`);
       const loader = new THREE.TextureLoader();
       realPhotos.forEach((url, idx) => {
@@ -986,10 +1019,7 @@
         });
       });
 
-      // ==========================================
-      // 原生 3D 物理交互事件监听 (0% 偏移率)
-      // ==========================================
-      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent); // 初始化设备状态
+      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
       
       const onDown = e => { 
         isCertDragging = true; 
@@ -1006,7 +1036,6 @@
           certPreviousX = clientX; 
         } 
         
-        // 更新物理射线的 2D 归一化设备坐标
         if(!isMobileDevice) {
            mouse.x = (clientX / window.innerWidth) * 2 - 1;
            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -1020,7 +1049,7 @@
       container.addEventListener('mouseup', onUp); 
       container.addEventListener('mouseleave', () => { 
           onUp(); 
-          mouse.set(-1, -1); // 移出屏幕时关闭射线锁定
+          mouse.set(-1, -1);
       });
 
       container.addEventListener('touchstart', onDown, {passive: false}); 
@@ -1041,11 +1070,10 @@
       certAnimationId = requestAnimationFrame(animateCert3D);
       const t = Date.now() * 0.001;
 
-      // 1. 物理惯性旋转与浮动
       if (isCertDragging) {
         certVelocityY = certTargetVelocityY;
       } else {
-        certVelocityY *= 0.94; // 惯性物理阻尼
+        certVelocityY *= 0.94; 
         if (Math.abs(certVelocityY) < 0.0005) certVelocityY = certVelocityY > 0 ? 0.0005 : -0.0005;
       }
       
@@ -1054,47 +1082,48 @@
         g.position.y = g.userData.baseY + Math.sin(t * 1.0 + g.userData.floatPhase) * 6.0; 
       });
 
-      // 2. 高密度星空微弱自转
       if (particleMesh) {
           particleMesh.rotation.y = t * 0.03;
           particleMesh.rotation.z = t * 0.01;
       }
 
-      // 3. 核心黑科技：Raycaster 磁吸交互引擎 (完全解决坐标错位)
+      // === Raycaster 追踪与玻璃光晕更新逻辑 ===
       if (!isMobileDevice && certCamera) {
           raycaster.setFromCamera(mouse, certCamera);
           const intersects = raycaster.intersectObjects(mainMeshes);
 
-          // 重置所有卡片的悬停状态
-          mainMeshes.forEach(m => m.userData.isHovered = false);
+          mainMeshes.forEach(m => { m.userData.targetHoverState = 0.0; });
 
-          // 当且仅当鼠标指向目标且没有在大幅度拖拽时，触发磁吸悬浮
           if (intersects.length > 0 && !isCertDragging) {
-              intersects[0].object.userData.isHovered = true;
+              const hit = intersects[0];
+              hit.object.userData.targetHoverState = 1.0;
+              // 精准捕获射线在卡片表面的 UV 交点，直接传给 Shader
+              if (hit.uv) {
+                  hit.object.material.userData.hoverUV.value.copy(hit.uv);
+              }
           }
       }
 
-      // 4. 应用磁吸物理阻尼动画
       mainMeshes.forEach(mesh => {
           const border = mesh.userData.border;
-          if (mesh.userData.isHovered) {
-              // 悬停：向摄像机方向（局部 -Z 轴）弹出，并触发极客高亮
-              mesh.position.z += (-40 - mesh.position.z) * 0.15;
-              mesh.material.emissive.setHex(0x004433);
-              border.material.color.setHex(0x00ff9d);
-              border.material.opacity = 1.0;
+          const matData = mesh.material.userData;
+          
+          // 平滑控制光晕显隐
+          matData.hoverState.value += (mesh.userData.targetHoverState - matData.hoverState.value) * 0.15;
+
+          // 核心交互：向屏幕正前方(+Z方向)弹出
+          if (matData.hoverState.value > 0.01) {
+              mesh.position.z += (30 - mesh.position.z) * 0.15; // 向前浮动 30
+              border.material.color.setHex(0xe0ffff);
+              border.material.opacity = matData.hoverState.value;
           } else {
-              // 恢复：平滑退回原位，恢复暗冷色调
-              mesh.position.z += (0 - mesh.position.z) * 0.1;
-              mesh.material.emissive.setHex(0x000000);
+              mesh.position.z += (0 - mesh.position.z) * 0.1;   // 平滑回归原位
               border.material.color.setHex(0x888888);
               border.material.opacity = 0.6;
           }
-          // 边框始终与卡片本体深度保持一致
           border.position.z = mesh.position.z;
       });
       
-      // 5. 执行渲染
       if(certScene && certCamera && certRenderer) {
          certRenderer.render(certScene, certCamera);
       }
