@@ -7,10 +7,8 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- 引入 Three.js 核心库 (Vanta 的前置依赖) -->
+  <!-- 引入 Three.js 核心库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- 引入 Vanta.js Fog 纯净云雾特效 (标准编译版，100% 杜绝模块引用报错) -->
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
@@ -95,21 +93,15 @@
     </div>
   </div>
 
-  <!-- 重构的 3D 证书弹窗（“大气三明治”错层空间画布） -->
+  <!-- 正式项目的 3D 证书弹窗（原生 3D 流体云雾 + 排斥力场） -->
   <div id="cert-3d-modal" class="fixed inset-0 z-[100000] bg-[#04060e] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-500 font-mono touch-none overflow-hidden">
     <button id="cert-modal-close" onclick="closeCertModal()" class="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-white/20 active:scale-95 transition-all outline-none cursor-pointer z-[100001]">
       <i data-lucide="x" class="w-6 h-6 pointer-events-none"></i>
     </button>
     <div id="cert-loading" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 text-xs tracking-[4px] z-20 transition-opacity duration-800">LOADING FRAGMENTS...</div>
     
-    <!-- 1. 远景层 (Z-0): Vanta 底层清晰云雾 -->
-    <div id="cert-vanta-bg" class="absolute inset-0 z-0 w-[120%] h-[120%] -left-[10%] -top-[10%] transition-transform duration-300 ease-out"></div>
-    
-    <!-- 2. 中景层 (Z-10): Three.js 顶层物理证书画布 -->
+    <!-- Three.js 顶层物理证书与 3D 流体星云同构画布 -->
     <div id="cert-canvas-container" class="w-full h-full absolute inset-0 z-10 pointer-events-auto"></div>
-
-    <!-- 3. 前景层 (Z-20): Vanta 视差遮罩雾。利用 radial-gradient 完美掏空中心，绝不挡证书 -->
-    <div id="cert-vanta-fg" class="absolute inset-0 z-20 w-[120%] h-[120%] -left-[10%] -top-[10%] pointer-events-none transition-transform duration-300 ease-out" style="-webkit-mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%); mask-image: radial-gradient(ellipse at center, transparent 40%, black 85%);"></div>
   </div>
 
   <canvas id="ambient-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-[-1]"></canvas>
@@ -336,6 +328,7 @@
 
     const CORE_COMPETENCIES = [
       { title: 'AIGC 与前沿工具应用', desc: '具备跨端网络检索能力，熟练掌握并在实际场景中深度应用前沿 AI 大模型。精通 Prompt 工程，独立利用 AI 实现全链路内容生成（含路演 PPT 制作）。', icon: 'bot', image: '2.jpg' },
+      // 已经严格恢复为 1.png，锁定原始内容
       { title: '工程与研发基础', desc: '熟悉 Python 编程语言，具备较强的底层逻辑拆解与软硬件联合调试能力，能快速适应技术开发环境。', icon: 'code-2', image: '1.png' },
       { title: '科研与数据分析', desc: '具备独立展开个人科研实验的经验，能熟练掌握运用 AI 进行数据分析，撰写高质量学术论文及调研报告。', icon: 'line-chart' },
       { title: '多项 AI 认证', desc: '拿下过多项权威 AI 证书，证明了在人工智能领域的系统学习能力与前沿技术的跟进速度。', icon: 'award' }
@@ -844,7 +837,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染与 Vanta 大气三明治错层逻辑 -->
+  <!-- 3D 展厅渲染与原生流体云排斥力场控制逻辑 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -852,65 +845,28 @@
     let certVelocityY = -0.0015, certTargetVelocityY = 0;
     let isCertDragging = false, certPreviousX = 0;
     
-    let certMouseX = 0, certMouseY = 0;
     let certWindowHalfX = window.innerWidth / 2;
     let certWindowHalfY = window.innerHeight / 2;
 
-    // Vanta 特效实例（双图层）
-    let vantaEffectBg = null;
-    let vantaEffectFg = null;
+    const clouds = []; 
+    const colorTeal = new THREE.Color(0x004422); 
+    const colorMoss = new THREE.Color(0x005533); 
 
-    function initVantaBackground() {
-      // 初始化远景层（更明亮、更清晰）
-      if (!vantaEffectBg) {
-        vantaEffectBg = VANTA.FOG({
-          el: "#cert-vanta-bg",
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          highlightColor: 0x004d66, // 提亮的赛博蓝
-          midtoneColor: 0x00664d,   // 提亮的微光绿
-          lowlightColor: 0x04060e,
-          baseColor: 0x04060e,
-          blurFactor: 0.85,
-          speed: 0.80,
-          zoom: 0.80 // 拉近视距让云雾絮状纹理更清晰
-        });
-      }
-      
-      // 初始化前景遮罩层（尺寸稍大，形成边缘压迫感）
-      if (!vantaEffectFg) {
-        vantaEffectFg = VANTA.FOG({
-          el: "#cert-vanta-fg",
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          highlightColor: 0x005577, 
-          midtoneColor: 0x007755,   
-          lowlightColor: 0x04060e,
-          baseColor: 0x04060e,
-          blurFactor: 0.90,
-          speed: 1.20,
-          zoom: 1.20 // 边缘云雾更显庞大
-        });
-      }
-    }
+    const raycaster = new THREE.Raycaster();
+    const mouse2D = new THREE.Vector2(9999, 9999); 
+    const intersectPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); 
+    const mouse3DPoint = new THREE.Vector3();
+    const REPULSION_RADIUS = 900; 
 
     function initCert3D() {
       if (isCert3DReady) return;
       
-      // 启动大气三明治双层背景
-      initVantaBackground();
-
       const container = document.getElementById('cert-canvas-container');
       certScene = new THREE.Scene();
+      certScene.fog = new THREE.FogExp2(0x04060e, 0.0003); 
       
       const getCameraZ = () => (window.innerWidth / window.innerHeight < 1.2 ? 1850 * (1.2 / (window.innerWidth / window.innerHeight)) : 1850);
-      certCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+      certCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 6000);
       certCamera.position.z = getCameraZ();
 
       certRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -918,13 +874,60 @@
       certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(certRenderer.domElement);
 
-      const ambientLight = new THREE.AmbientLight(0xaaffff, 0.4); 
+      const ambientLight = new THREE.AmbientLight(0xaaffff, 0.5); 
       certScene.add(ambientLight);
-      
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      dirLight.position.set(-200, 300, 500);
-      certScene.add(dirLight);
 
+      // --- 已经精准修改为 ./3.png，并且不再影响 CORE_COMPETENCIES ---
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.load('./3.png', (cloudTexture) => {
+        document.getElementById('cert-loading').style.opacity = '0';
+        
+        function spawnClouds(count, radius, zRange, maxOpacity, scaleMult) {
+          for(let i=0; i<count; i++) {
+            const material = new THREE.SpriteMaterial({
+              map: cloudTexture,
+              color: Math.random() > 0.5 ? colorTeal : colorMoss,
+              transparent: true,
+              opacity: maxOpacity, 
+              blending: THREE.AdditiveBlending,
+              depthWrite: false 
+            });
+            const sprite = new THREE.Sprite(material);
+            
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            const r = radius * Math.cbrt(Math.random()); 
+            
+            const posX = r * Math.sin(phi) * Math.cos(theta);
+            const posY = r * Math.sin(phi) * Math.sin(theta);
+            const posZ = (Math.random() - 0.5) * zRange.spread + zRange.center;
+            
+            sprite.position.set(posX, posY, posZ);
+            sprite.material.rotation = Math.random() * Math.PI * 2;
+            
+            const scale = (Math.random() * 1000 + 800) * scaleMult;
+            sprite.scale.set(scale, scale, 1);
+            
+            sprite.userData = {
+              baseX: posX, baseY: posY, baseZ: posZ,
+              baseOpacity: maxOpacity,
+              randomPhase: Math.random() * Math.PI * 2
+            };
+            
+            certScene.add(sprite);
+            clouds.push(sprite);
+          }
+        }
+
+        spawnClouds(60, 3000, {center: -1200, spread: 1000}, 0.40, 2.5); // 远景底云 40%
+        spawnClouds(40, 2000, {center: 0, spread: 800}, 0.25, 1.8);      // 中景穿插 25%
+        spawnClouds(20, 1500, {center: 1000, spread: 400}, 0.15, 2.0);   // 前景薄雾 15%
+      }, undefined, (err) => {
+        console.warn("[引擎提示] ./3.png 加载失败，请检查路径。");
+        document.getElementById('cert-loading').innerText = "TEXTURE LOAD ERROR";
+      });
+
+      // --- 构建 3D 证书阵列 ---
       mainCarousel = new THREE.Group(); 
       certScene.add(mainCarousel); 
 
@@ -990,7 +993,7 @@
       const checkLoadingComplete = () => {
         loaded++;
         if (loaded === realPhotos.length) {
-          document.getElementById('cert-loading').style.opacity = '0';
+          // 证书贴图全部加载完毕
         }
       };
 
@@ -1007,7 +1010,6 @@
           },
           undefined,
           err => {
-            console.warn(`[引擎提示] 证书图片加载跳过: ${url}`);
             checkLoadingComplete();
           }
         );
@@ -1022,13 +1024,13 @@
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        certMouseX = clientX - certWindowHalfX;
-        certMouseY = clientY - certWindowHalfY;
-
         if(isCertDragging){ 
           certTargetVelocityY = (clientX - certPreviousX) * 0.0008; 
           certPreviousX = clientX; 
         } 
+
+        mouse2D.x = (clientX / window.innerWidth) * 2 - 1;
+        mouse2D.y = -(clientY / window.innerHeight) * 2 + 1;
       };
       const onUp = () => isCertDragging = false;
       
@@ -1064,20 +1066,43 @@
       }
       
       mainCarousel.rotation.y += certVelocityY; 
-
-      // --- 大气三明治错位交互 ---
-      if (vantaEffectBg || vantaEffectFg) {
-         const parallaxX = Math.sin(mainCarousel.rotation.y) * 40;
-         const bgEl = document.getElementById('cert-vanta-bg');
-         const fgEl = document.getElementById('cert-vanta-fg');
-         
-         // 远景慢慢正向移，前景快速反向移，形成极致立体景深
-         if(bgEl) bgEl.style.transform = `translateX(${parallaxX * 0.6}px)`;
-         if(fgEl) fgEl.style.transform = `translateX(${-parallaxX * 1.5}px)`;
-      }
       
       mainCarousel.children.forEach(g => { 
-        g.position.y = g.userData.baseY + Math.sin(t * g.userData.floatSpeed + g.userData.floatPhase) * g.userData.floatAmplitude; 
+        g.position.y = g.userData.baseY + Math.sin(t * 1.0 + g.userData.floatPhase) * 6.0; 
+      });
+
+      // --- 计算 Raycaster 鼠标 3D 坐标并驱动流体排斥 ---
+      if (certCamera) {
+        raycaster.setFromCamera(mouse2D, certCamera);
+        raycaster.ray.intersectPlane(intersectPlane, mouse3DPoint);
+      }
+
+      clouds.forEach((sprite, index) => {
+        const base = sprite.userData;
+        const breathOffset = Math.sin(t * 0.5 + base.randomPhase) * 30;
+        
+        const currentTargetX = base.baseX + breathOffset;
+        const currentTargetY = base.baseY + breathOffset;
+        
+        const distToMouse = sprite.position.distanceTo(mouse3DPoint);
+        
+        if (distToMouse < REPULSION_RADIUS) {
+          const force = Math.pow((REPULSION_RADIUS - distToMouse) / REPULSION_RADIUS, 1.5) * 400;
+          const dir = new THREE.Vector3().subVectors(sprite.position, mouse3DPoint).normalize();
+          
+          sprite.position.x += dir.x * force * 0.1; 
+          sprite.position.y += dir.y * force * 0.1;
+          
+          sprite.material.opacity = Math.max(0.01, base.baseOpacity * (distToMouse / REPULSION_RADIUS));
+        } else {
+          sprite.position.x += (currentTargetX - sprite.position.x) * 0.02;
+          sprite.position.y += (currentTargetY - sprite.position.y) * 0.02;
+          
+          const targetOpacity = base.baseOpacity * (0.8 + Math.sin(t + base.randomPhase) * 0.2);
+          sprite.material.opacity += (targetOpacity - sprite.material.opacity) * 0.05;
+        }
+        
+        sprite.material.rotation += 0.0005;
       });
       
       if(certScene && certCamera && certRenderer) {
@@ -1102,11 +1127,6 @@
         modal.classList.add('hidden'); 
         cancelAnimationFrame(certAnimationId); 
         certAnimationId = null;
-        
-        // 彻底销毁双层实例以防内存溢出
-        if (vantaEffectBg) { vantaEffectBg.destroy(); vantaEffectBg = null; }
-        if (vantaEffectFg) { vantaEffectFg.destroy(); vantaEffectFg = null; }
-        
         isCert3DReady = false; 
       }, 500);
     }
