@@ -10,6 +10,7 @@
   
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -26,11 +27,12 @@
       padding: 0;
     }
 
-    /* === 选项 E：极客全向纯黑护盾 === */
+    /* === 极客全向纯黑护盾：确保文字在水波上绝对清晰 === */
     .halo-shield {
       text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1) !important;
     }
 
+    /* 独立水波图层：不再被黑底吞噬 */
     #water-canvas-layer {
       position: fixed;
       top: 0;
@@ -46,6 +48,7 @@
       pointer-events: none; 
     }
 
+    /* 抬升正文与页脚，确保不被水波遮挡 */
     main, footer {
       position: relative;
       z-index: 10;
@@ -54,6 +57,7 @@
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
     #cert-3d-modal, #cert-3d-modal * { cursor: auto !important; }
 
+    /* === 全局冰川冷白光标 === */
     body.hero-mode #cursor-dot { background-color: #ffffff !important; }
     body.hero-mode #cursor-ring { border-color: rgba(255, 255, 255, 0.5) !important; }
     
@@ -308,6 +312,7 @@
     </section>
 
   </main>
+
   <footer id="contact" class="pt-24 md:pt-32 pb-8 border-t border-white/10 bg-transparent relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
       <div class="flex flex-col items-center text-center mb-16 md:mb-20 cursor-default">
@@ -335,9 +340,8 @@
     </div>
   </footer>
 
-  <!-- 核心交互脚本：修正版空间折叠（金蝉脱壳）引擎 -->
   <script>
-    let isHeroDestroyed = false; // 全局单向门状态锁
+    let isForestPermanentlyHidden = false; // 森林永久隐形锁
 
     $(document).ready(function() {
       try {
@@ -357,29 +361,8 @@
           isReady = true;
         }, 800);
 
+        // 视觉雷达：接管水波图层
         $(window).on('scroll', function() {
-          // 【空间折叠 2.0】：当滑过 2.1 屏（森林彻底隐形、科技感全透）时触发
-          const foldThreshold = window.innerHeight * 2.1;
-          const foldOffset = window.innerHeight * 2; // 需要补偿的 200vh 落差
-
-          if (!isHeroDestroyed && window.scrollY >= foldThreshold) {
-            // 1. 精准切割：只抹除森林图层与欢迎词，绝对保留科技视频与介绍！
-            $('#forest-wrapper, #hero-text-initial').remove();
-            
-            // 2. 维度压缩：将超长容器还原为 100vh 单屏
-            $('#hero-container').removeClass('h-[300vh]').addClass('h-[100vh]');
-            
-            // 3. 视觉补偿：无缝抹平 200vh 落差，视觉绝对无感
-            window.scrollBy(0, -foldOffset);
-            
-            isHeroDestroyed = true; // 永久锁死状态
-          }
-
-          if (isHeroDestroyed) {
-             $waterLayer.css('opacity', '1');
-             return;
-          }
-
           if (window.scrollY > window.innerHeight * 0.8) {
             $waterLayer.css('opacity', '1');
           } else {
@@ -389,10 +372,12 @@
         
         $(window).trigger('scroll');
 
+        // 交互雷达：250ms 极限防卡顿水波
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
-
-          if (!isHeroDestroyed && window.scrollY <= window.innerHeight * 0.8) {
+          
+          // 在未进入正文时，切断水波渲染
+          if (window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
 
@@ -554,7 +539,7 @@
           />
         ` : '';
 
-        // 【新增需求】：PC端专属静态提示词，精确定位前两张卡片
+        // PC端专属静态提示词
         const pcStaticPrompt = (i === 0 || i === 1)
           ? `<span class="hidden md:inline-flex text-[#00ff9d] text-xs font-bold tracking-widest ml-2"> &lt; 移动到此处查看 &gt; </span>`
           : '';
@@ -587,7 +572,6 @@
             </div>
             <div>
               <h3 class="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 tracking-tight">${comp.title}</h3>
-              <!-- 注入选项 E：冷蓝灰 + halo-shield 护盾 -->
               <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base inline">${comp.desc}</p>${pcStaticPrompt}${actionBtn}
               ${mobilePrompt}
             </div>
@@ -652,7 +636,6 @@
             <div class="md:col-span-8 relative">
               <ul class="space-y-3 md:space-y-4">
                 ${exp.bullets.map(bullet => `
-                  <!-- 注入选项 E：冷蓝灰 + halo-shield 护盾 -->
                   <li class="flex items-start gap-2 md:gap-3 text-slate-300 halo-shield font-light text-sm md:text-base leading-relaxed">
                     <i data-lucide="check-circle-2" class="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-[#00f0ff] shrink-0 opacity-70"></i>
                     <span>${bullet}</span>
@@ -729,7 +712,7 @@
         targetX += (mouseX - targetX) * 0.05; 
         targetY += (mouseY - targetY) * 0.05;
 
-        // 【优化细节】：即便森林被毁，酷炫的科技视频依然拥有视差跟随！
+        // 科技视频保持视差跟随
         if (sciFiVideo && isVideoEnded) {
             const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
             const scaleBg = window.innerWidth < 768 ? 1.02 : 1.05;
@@ -739,8 +722,8 @@
             sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
         }
 
-        // 仅在森林未被销毁时计算自然视差
-        if (!isHeroDestroyed && window.scrollY < window.innerHeight * 1.5) {
+        // 仅在森林未被永久隐形时计算自然视差
+        if (!isForestPermanentlyHidden && window.scrollY < window.innerHeight * 1.5) {
           const isMobile = window.innerWidth < 768;
           const scaleBg = isMobile ? 1.02 : 1.05;
           const scaleMg = isMobile ? 1.05 : 1.15;
@@ -759,25 +742,16 @@
 
       function handleScrollState() {
         const scrollY = window.scrollY;
+        const maxScroll = window.innerHeight * 1.2; 
+        const progress = Math.min(scrollY / maxScroll, 1);
 
-        // 【核心状态固化】：一旦完成折叠，强制锁定科技主页清晰度
-        if (isHeroDestroyed) {
-          document.body.classList.remove('hero-mode');
-          if (heroVideoLayer) heroVideoLayer.style.opacity = 1;
-          if (heroTextFinal) {
-            heroTextFinal.style.opacity = 1;
-            heroTextFinal.style.transform = `scale(1) translateY(0px)`;
-          }
-          if (scrollY > 50) {
-            nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
-            nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
-          } else {
-            nav.classList.remove('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
-            nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
-          }
-          return; // 终止下方基于未折叠状态的计算
+        // 【核心修复】：单向锁定，一旦划过森林（或者重新刷新在了正文区域），永久隐藏森林，但不改变容器高度，彻底避免弹簧反弹！
+        if (progress >= 1 && !isForestPermanentlyHidden) {
+            isForestPermanentlyHidden = true;
+            if(forestWrapper) forestWrapper.style.display = 'none';
+            if(heroTextInitial) heroTextInitial.style.display = 'none';
         }
-        
+
         if (scrollY < window.innerHeight * 0.4) {
           document.body.classList.add('hero-mode');
         } else {
@@ -792,14 +766,13 @@
           nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
         }
 
-        const maxScroll = window.innerHeight * 1.2; 
-        const progress = Math.min(scrollY / maxScroll, 1);
-        
-        if(forestWrapper) {
+        // 仅在森林还未隐形时处理它的渐变淡出
+        if (!isForestPermanentlyHidden && forestWrapper) {
           forestWrapper.style.opacity = Math.max(1 - progress * 1.5, 0);
           forestWrapper.style.transform = `scale(${1 + progress * 0.05}) translateY(${progress * 30}px)`;
         }
 
+        // 科技视频的淡入不受干扰
         if(heroVideoLayer) {
           heroVideoLayer.style.opacity = Math.min(progress * 1.5, 1);
         }
@@ -915,7 +888,6 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染代码原封不动，完美保留 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
