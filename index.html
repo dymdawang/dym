@@ -26,12 +26,11 @@
       padding: 0;
     }
 
-    /* 全向纯黑护盾：确保文字在水波上绝对清晰 */
+    /* 选项 E：极客全向纯黑护盾 */
     .halo-shield {
       text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1) !important;
     }
 
-    /* 独立水波图层 */
     #water-canvas-layer {
       position: fixed;
       top: 0;
@@ -47,7 +46,6 @@
       pointer-events: none; 
     }
 
-    /* 抬升正文 */
     main, footer {
       position: relative;
       z-index: 10;
@@ -339,7 +337,7 @@
   </footer>
 
   <script>
-    let isForestPermanentlyHidden = false; // 全局单向门状态锁
+    let isForestPermanentlyHidden = false; // 森林物理抹除锁
 
     $(document).ready(function() {
       try {
@@ -359,7 +357,7 @@
           isReady = true;
         }, 800);
 
-        // 视觉雷达：仅负责水波的显隐
+        // 视觉雷达：接管水波图层
         $(window).on('scroll', function() {
           if (window.scrollY > window.innerHeight * 0.8) {
             $waterLayer.css('opacity', '1');
@@ -370,11 +368,10 @@
         
         $(window).trigger('scroll');
 
-        // 交互雷达：250ms 高频丝滑水波
+        // 交互雷达：250ms 极限防卡顿水波
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
           
-          // 在首页前 0.8 屏，拦截水波渲染，无论显示的是森林还是科技头像
           if (window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
@@ -720,7 +717,7 @@
             sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
         }
 
-        // 森林视差
+        // 仅在森林未被永久锁死时计算自然视差
         if (!isForestPermanentlyHidden && window.scrollY < window.innerHeight * 1.5) {
           const isMobile = window.innerWidth < 768;
           const scaleBg = isMobile ? 1.02 : 1.05;
@@ -741,46 +738,48 @@
       function handleScrollState() {
         const scrollY = window.scrollY;
 
-        // 【终极空间折叠核心代码】：解决黑屏与反弹的根源
-        if (!isForestPermanentlyHidden && scrollY >= window.innerHeight * 2.1) {
+        // 【终极物理折叠逻辑】：一旦滑到科技头像完全显示（1.2屏），瞬间折叠空间，消灭死区
+        const foldOffset = window.innerHeight * 1.2;
+        if (!isForestPermanentlyHidden && scrollY >= foldOffset) {
             isForestPermanentlyHidden = true;
             
-            // 1. 瞬间冻结全局平滑滚动，防止弹簧反弹
+            // 1. 冻结物理引擎：停用平滑滚动
             document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
             
-            // 2. 彻底隐藏森林与开场白
+            // 2. 彻底移除森林，只留科技头像
             if(forestWrapper) forestWrapper.style.display = 'none';
             if(heroTextInitial) heroTextInitial.style.display = 'none';
             
-            // 3. 将极其占地方的 300vh 强行压缩回 100vh 单屏高度
+            // 3. 空间折叠：将 300vh 的容器强行切断为 180vh（砍掉 120vh）
             const heroContainer = document.getElementById('hero-container');
             if (heroContainer) {
                 heroContainer.classList.remove('h-[300vh]');
-                heroContainer.classList.add('h-[100vh]');
+                heroContainer.style.height = '180vh';
             }
             
-            // 4. 瞬间抹平 200vh 的滚动条落差（此时因为已关闭动画，视觉绝对无感）
-            window.scrollBy(0, -(window.innerHeight * 2));
+            // 4. 坐标系拉齐：将滚动条同步往上拉 120vh，消除黑屏死区。此时用户将身处 scrollY = 0 的全新定点。
+            window.scrollBy(0, -foldOffset);
             
-            // 5. 50 毫秒后，再把丝滑滚动还给浏览器
+            // 5. 50毫秒后，重启物理引擎，还给页面平滑滚动的能力
             setTimeout(() => {
                 document.documentElement.style.setProperty('scroll-behavior', 'smooth', 'important');
             }, 50);
             
-            // 退出本次判定，等待下一帧基于新高度的纯净渲染
             return; 
         }
 
-        // ====== 状态固化区：如果森林已折叠，将科技页死死钉在顶部 (0~100vh) ======
+        // ============================================
+        // 状态一：折叠后的永久固化区
+        // 确保科技头像是完全透明、不可被干涉的唯一真神
+        // ============================================
         if (isForestPermanentlyHidden) {
           document.body.classList.remove('hero-mode');
-          // 科技视频完全清晰
           if (heroVideoLayer) heroVideoLayer.style.opacity = 1;
           if (heroTextFinal) {
             heroTextFinal.style.opacity = 1;
             heroTextFinal.style.transform = `scale(1) translateY(0px)`;
           }
-          // 顶栏状态跟随现在的实际坐标
+          
           if (scrollY > 50) {
             nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
             nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
@@ -788,10 +787,12 @@
             nav.classList.remove('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
             nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
           }
-          return; 
+          return; // 彻底退出旧逻辑
         }
 
-        // ====== 以下是未折叠（还在首页看森林）时的正常视差渐变逻辑 ======
+        // ============================================
+        // 状态二：折叠前（刚进入页面）的平滑淡入淡出动画
+        // ============================================
         if (scrollY < window.innerHeight * 0.4) {
           document.body.classList.add('hero-mode');
         } else {
