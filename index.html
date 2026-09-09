@@ -20,18 +20,24 @@
     
     html { scroll-behavior: smooth; }
 
-    /* 全局背景挂载 4.jpg，固定视差水底 */
+    /* 恢复纯净的 body 底色，剥离背景图 */
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #080b1a;
-      background-image: url('./4.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
       color: white;
       overflow-x: hidden;
       margin: 0;
       padding: 0;
+    }
+
+    /* 新增：绝对物理隔离的水波纹专属容器，接管 4.jpg */
+    #water-wrap {
+      position: relative;
+      background-image: url('./4.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      z-index: 1;
     }
 
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
@@ -214,146 +220,149 @@
       </div>
     </section>
 
-    <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
-        <p class="text-gray-400 font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
-      </div>
-      <div class="relative w-full flex overflow-hidden">
-        <div class="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
-        <div id="skills-marquee-container" class="animate-marquee"></div>
-      </div>
-    </section>
+    <!-- ==== 新增：物理隔离水波纹专属包裹层 ==== -->
+    <div id="water-wrap">
 
-    <section id="about" class="py-16 md:py-24 relative overflow-hidden bg-transparent">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#00f0ff]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none max-w-[100vw]"></div>
-      <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
-          <div class="cursor-default">
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-[1.3] md:leading-[1.2] reveal">
-              具备 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">“极客精神”</span> <br/>
-              与 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff9d] to-[#00f0ff]">“科研韧性”</span> <br class="md:hidden"/>的复合型人才。
-            </h2>
-          </div>
-          <div class="flex flex-col gap-8 cursor-default">
-            <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed reveal text-justify">
-              在学术探索上，拥有省市级大赛获奖经历及名校研学背景；在技术应用上，是 AIGC 领域的早期实践者，能够打破常规，利用前沿 AI 工具实现全链路内容开发与效率破局。兼具出色的动手实践能力与旺盛的求知欲。
-            </p>
-            <div class="grid grid-cols-2 gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/10">
-              <div class="reveal">
-                <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">3<span class="text-[#00f0ff]">+</span></h4>
-                <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">省市级奖项</p>
-              </div>
-              <div class="reveal reveal-delay-1">
-                <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">2<span class="text-[#00ff9d]">+</span></h4>
-                <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">顶尖高校研学</p>
+      <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
+          <p class="text-gray-400 font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
+        </div>
+        <div class="relative w-full flex overflow-hidden">
+          <div class="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
+          <div class="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
+          <div id="skills-marquee-container" class="animate-marquee"></div>
+        </div>
+      </section>
+
+      <section id="about" class="py-16 md:py-24 relative overflow-hidden bg-transparent">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#00f0ff]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none max-w-[100vw]"></div>
+        <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
+            <div class="cursor-default">
+              <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-[1.3] md:leading-[1.2] reveal">
+                具备 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">“极客精神”</span> <br/>
+                与 <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff9d] to-[#00f0ff]">“科研韧性”</span> <br class="md:hidden"/>的复合型人才。
+              </h2>
+            </div>
+            <div class="flex flex-col gap-8 cursor-default">
+              <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed reveal text-justify">
+                在学术探索上，拥有省市级大赛获奖经历及名校研学背景；在技术应用上，是 AIGC 领域的早期实践者，能够打破常规，利用前沿 AI 工具实现全链路内容开发与效率破局。兼具出色的动手实践能力与旺盛的求知欲。
+              </p>
+              <div class="grid grid-cols-2 gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/10">
+                <div class="reveal">
+                  <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">3<span class="text-[#00f0ff]">+</span></h4>
+                  <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">省市级奖项</p>
+                </div>
+                <div class="reveal reveal-delay-1">
+                  <h4 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-1 md:mb-2">2<span class="text-[#00ff9d]">+</span></h4>
+                  <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-500">顶尖高校研学</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="skills" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
-      <div class="mb-10 md:mb-16 max-w-3xl cursor-default">
-        <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-tight reveal">
-          跨界整合的 <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">全链路技术壁垒。</span>
-        </h2>
-      </div>
-      <div id="core-competencies-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </section>
+      <section id="skills" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+        <div class="mb-10 md:mb-16 max-w-3xl cursor-default">
+          <h2 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter leading-tight reveal">
+            跨界整合的 <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#00ff9d]">全链路技术壁垒。</span>
+          </h2>
+        </div>
+        <div id="core-competencies-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      </section>
 
-    <section id="projects" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
-      <div class="mb-10 md:mb-16 cursor-default">
-        <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">核心项目与科研实践</h2>
-      </div>
-      <div class="flex flex-col gap-6 md:gap-8" id="experience-list-container"></div>
-    </section>
-    
-    <section id="specialties" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
-       <div class="mb-10 md:mb-16 cursor-default">
-         <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">个人特长与兴趣</h2>
-       </div>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 border-t border-white/10 pt-10 md:pt-16">
-          <div class="group reveal cursor-default">
-             <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00f0ff]/20 transition-colors">
-               <i data-lucide="wrench" class="text-[#00f0ff]"></i>
-             </div>
-             <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">硬件/机械工程实操</h3>
-             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
-          </div>
-          <div class="group reveal reveal-delay-1 cursor-default">
-             <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00ff9d]/20 transition-colors">
-               <i data-lucide="target" class="text-[#00ff9d]"></i>
-             </div>
-             <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">竞技体育精神</h3>
-             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
-          </div>
-       </div>
-    </section>
+      <section id="projects" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+        <div class="mb-10 md:mb-16 cursor-default">
+          <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">核心项目与科研实践</h2>
+        </div>
+        <div class="flex flex-col gap-6 md:gap-8" id="experience-list-container"></div>
+      </section>
+      
+      <section id="specialties" class="py-16 md:py-24 max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 bg-transparent">
+         <div class="mb-10 md:mb-16 cursor-default">
+           <h2 class="text-3xl sm:text-4xl font-black tracking-tighter text-white reveal">个人特长与兴趣</h2>
+         </div>
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 border-t border-white/10 pt-10 md:pt-16">
+            <div class="group reveal cursor-default">
+               <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00f0ff]/20 transition-colors">
+                 <i data-lucide="wrench" class="text-[#00f0ff]"></i>
+               </div>
+               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">硬件/机械工程实操</h3>
+               <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
+            </div>
+            <div class="group reveal reveal-delay-1 cursor-default">
+               <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00ff9d]/20 transition-colors">
+                 <i data-lucide="target" class="text-[#00ff9d]"></i>
+               </div>
+               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">竞技体育精神</h3>
+               <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
+            </div>
+         </div>
+      </section>
 
-  </main>
+    </main>
 
-  <footer id="contact" class="pt-24 md:pt-32 pb-8 border-t border-white/10 bg-transparent relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
-      <div class="flex flex-col items-center text-center mb-16 md:mb-20 cursor-default">
-        <h2 class="text-4xl sm:text-5xl md:text-[6rem] font-black tracking-tighter leading-tight mb-8 reveal">
-          开启 <span class="italic font-serif font-light text-gray-400">无限可能。</span>
-        </h2>
-        
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 reveal reveal-delay-1 w-full max-w-sm sm:max-w-none mx-auto justify-center">
-          <button id="copy-email-btn" data-copy-val="dymdawang@outlook.com" data-original-text="我的邮箱" data-icon="mail" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-full text-base font-bold shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group cursor-pointer border-none outline-none">
-            <i data-lucide="mail" class="w-5 h-5"></i>
-            <span>我的邮箱</span>
-          </button>
+    <footer id="contact" class="pt-24 md:pt-32 pb-8 border-t border-white/10 bg-transparent relative overflow-hidden">
+      <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
+        <div class="flex flex-col items-center text-center mb-16 md:mb-20 cursor-default">
+          <h2 class="text-4xl sm:text-5xl md:text-[6rem] font-black tracking-tighter leading-tight mb-8 reveal">
+            开启 <span class="italic font-serif font-light text-gray-400">无限可能。</span>
+          </h2>
           
-          <button id="copy-phone-btn" data-copy-val="15967720688" data-original-text="我的电话" data-icon="phone" class="w-full sm:w-auto px-8 py-4 bg-white/10 text-white rounded-full text-base font-bold border border-white/20 hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer outline-none">
-            <i data-lucide="phone" class="w-5 h-5"></i>
-            <span>我的电话</span>
-          </button>
+          <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 reveal reveal-delay-1 w-full max-w-sm sm:max-w-none mx-auto justify-center">
+            <button id="copy-email-btn" data-copy-val="dymdawang@outlook.com" data-original-text="我的邮箱" data-icon="mail" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-full text-base font-bold shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group cursor-pointer border-none outline-none">
+              <i data-lucide="mail" class="w-5 h-5"></i>
+              <span>我的邮箱</span>
+            </button>
+            
+            <button id="copy-phone-btn" data-copy-val="15967720688" data-original-text="我的电话" data-icon="phone" class="w-full sm:w-auto px-8 py-4 bg-white/10 text-white rounded-full text-base font-bold border border-white/20 hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer outline-none">
+              <i data-lucide="phone" class="w-5 h-5"></i>
+              <span>我的电话</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-gray-500 pt-8 border-t border-white/10 gap-4 cursor-default text-center">
+          <p>来自 浙江</p>
+          <p>&copy; 2026 Dong Yiming. 保留所有权利。</p>
         </div>
       </div>
-      
-      <div class="flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-gray-500 pt-8 border-t border-white/10 gap-4 cursor-default text-center">
-        <p>来自 浙江</p>
-        <p>&copy; 2026 Dong Yiming. 保留所有权利。</p>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
-  <!-- 初始化水波纹引擎：已加入 500ms 节流限制 + 20px 恢复半径 + 800ms 刷新护盾 -->
+    </div>
+    <!-- ==== 水波纹隔离区结束 ==== -->
+
+  <!-- 初始化水波纹引擎：已隔离至 water-wrap 容器，完美避开首页 -->
   <script>
     $(document).ready(function() {
       try {
-        const $body = $('body');
+        // 绑定目标从 body 变为专门的 #water-wrap
+        const $waterWrap = $('#water-wrap');
         
-        // 1. 初始化引擎：彻底关闭原生的暴走高频触发 (interactive: false)
-        $body.ripples({
+        $waterWrap.ripples({
           resolution: 800,
           dropRadius: 20,
           perturbance: 0.04,
           interactive: false 
         });
 
-        // 2. 状态锁：定义防误触护盾与节流阀计时器
         let isReady = false;
         let lastDropTime = 0;
 
-        // 3. 开启 800ms 刷新护盾：彻底隔绝刚进页面时的幽灵水波事件
         setTimeout(() => {
           isReady = true;
         }, 800);
 
-        // 4. 自定义交互监听：500ms 冷却（一秒最多触发2次），彻底根除 GPU 过载
-        $body.on('mousemove', function(e) {
-          if (!isReady) return; // 护盾期间无视一切动作
+        // 监听挂载点同步修改，只监听专属容器内的移动
+        $waterWrap.on('mousemove', function(e) {
+          if (!isReady) return;
 
           const now = Date.now();
           if (now - lastDropTime > 500) {
             lastDropTime = now;
             try {
-              // 手动触发水波，半径维持大气的 20
-              $body.ripples('drop', e.pageX, e.pageY, 20, 0.04);
+              $waterWrap.ripples('drop', e.pageX, e.pageY, 20, 0.04);
             } catch (err) {}
           }
         });
