@@ -10,7 +10,6 @@
   
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -27,12 +26,12 @@
       padding: 0;
     }
 
-    /* === 极客全向纯黑护盾：确保文字在水波上绝对清晰 === */
+    /* 全向纯黑护盾：确保文字在水波上绝对清晰 */
     .halo-shield {
       text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1) !important;
     }
 
-    /* 独立水波图层：不再被黑底吞噬 */
+    /* 独立水波图层 */
     #water-canvas-layer {
       position: fixed;
       top: 0;
@@ -48,7 +47,7 @@
       pointer-events: none; 
     }
 
-    /* 抬升正文与页脚，确保不被水波遮挡 */
+    /* 抬升正文 */
     main, footer {
       position: relative;
       z-index: 10;
@@ -57,7 +56,6 @@
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
     #cert-3d-modal, #cert-3d-modal * { cursor: auto !important; }
 
-    /* === 全局冰川冷白光标 === */
     body.hero-mode #cursor-dot { background-color: #ffffff !important; }
     body.hero-mode #cursor-ring { border-color: rgba(255, 255, 255, 0.5) !important; }
     
@@ -341,7 +339,7 @@
   </footer>
 
   <script>
-    let isForestPermanentlyHidden = false; // 森林永久隐形锁
+    let isForestPermanentlyHidden = false; // 全局单向门状态锁
 
     $(document).ready(function() {
       try {
@@ -361,7 +359,7 @@
           isReady = true;
         }, 800);
 
-        // 视觉雷达：接管水波图层
+        // 视觉雷达：仅负责水波的显隐
         $(window).on('scroll', function() {
           if (window.scrollY > window.innerHeight * 0.8) {
             $waterLayer.css('opacity', '1');
@@ -372,11 +370,11 @@
         
         $(window).trigger('scroll');
 
-        // 交互雷达：250ms 极限防卡顿水波
+        // 交互雷达：250ms 高频丝滑水波
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
           
-          // 在未进入正文时，切断水波渲染
+          // 在首页前 0.8 屏，拦截水波渲染，无论显示的是森林还是科技头像
           if (window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
@@ -722,7 +720,7 @@
             sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
         }
 
-        // 仅在森林未被永久隐形时计算自然视差
+        // 森林视差
         if (!isForestPermanentlyHidden && window.scrollY < window.innerHeight * 1.5) {
           const isMobile = window.innerWidth < 768;
           const scaleBg = isMobile ? 1.02 : 1.05;
@@ -742,16 +740,58 @@
 
       function handleScrollState() {
         const scrollY = window.scrollY;
-        const maxScroll = window.innerHeight * 1.2; 
-        const progress = Math.min(scrollY / maxScroll, 1);
 
-        // 【核心修复】：单向锁定，一旦划过森林（或者重新刷新在了正文区域），永久隐藏森林，但不改变容器高度，彻底避免弹簧反弹！
-        if (progress >= 1 && !isForestPermanentlyHidden) {
+        // 【终极空间折叠核心代码】：解决黑屏与反弹的根源
+        if (!isForestPermanentlyHidden && scrollY >= window.innerHeight * 2.1) {
             isForestPermanentlyHidden = true;
+            
+            // 1. 瞬间冻结全局平滑滚动，防止弹簧反弹
+            document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
+            
+            // 2. 彻底隐藏森林与开场白
             if(forestWrapper) forestWrapper.style.display = 'none';
             if(heroTextInitial) heroTextInitial.style.display = 'none';
+            
+            // 3. 将极其占地方的 300vh 强行压缩回 100vh 单屏高度
+            const heroContainer = document.getElementById('hero-container');
+            if (heroContainer) {
+                heroContainer.classList.remove('h-[300vh]');
+                heroContainer.classList.add('h-[100vh]');
+            }
+            
+            // 4. 瞬间抹平 200vh 的滚动条落差（此时因为已关闭动画，视觉绝对无感）
+            window.scrollBy(0, -(window.innerHeight * 2));
+            
+            // 5. 50 毫秒后，再把丝滑滚动还给浏览器
+            setTimeout(() => {
+                document.documentElement.style.setProperty('scroll-behavior', 'smooth', 'important');
+            }, 50);
+            
+            // 退出本次判定，等待下一帧基于新高度的纯净渲染
+            return; 
         }
 
+        // ====== 状态固化区：如果森林已折叠，将科技页死死钉在顶部 (0~100vh) ======
+        if (isForestPermanentlyHidden) {
+          document.body.classList.remove('hero-mode');
+          // 科技视频完全清晰
+          if (heroVideoLayer) heroVideoLayer.style.opacity = 1;
+          if (heroTextFinal) {
+            heroTextFinal.style.opacity = 1;
+            heroTextFinal.style.transform = `scale(1) translateY(0px)`;
+          }
+          // 顶栏状态跟随现在的实际坐标
+          if (scrollY > 50) {
+            nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+            nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+          } else {
+            nav.classList.remove('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+            nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+          }
+          return; 
+        }
+
+        // ====== 以下是未折叠（还在首页看森林）时的正常视差渐变逻辑 ======
         if (scrollY < window.innerHeight * 0.4) {
           document.body.classList.add('hero-mode');
         } else {
@@ -766,13 +806,14 @@
           nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
         }
 
-        // 仅在森林还未隐形时处理它的渐变淡出
-        if (!isForestPermanentlyHidden && forestWrapper) {
+        const maxScroll = window.innerHeight * 1.2; 
+        const progress = Math.min(scrollY / maxScroll, 1);
+        
+        if(forestWrapper) {
           forestWrapper.style.opacity = Math.max(1 - progress * 1.5, 0);
           forestWrapper.style.transform = `scale(${1 + progress * 0.05}) translateY(${progress * 30}px)`;
         }
 
-        // 科技视频的淡入不受干扰
         if(heroVideoLayer) {
           heroVideoLayer.style.opacity = Math.min(progress * 1.5, 1);
         }
