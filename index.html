@@ -8,11 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   
-  <!-- 引入 jQuery 与 jQuery Ripples 水波引擎 -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
-
-  <!-- 引入 Three.js 核心库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -20,7 +17,6 @@
     
     html { scroll-behavior: smooth; }
 
-    /* 1. 净化 body：剥离背景图，恢复极客黑底色，确保首页暗场完美过渡 */
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #080b1a; 
@@ -30,7 +26,12 @@
       padding: 0;
     }
 
-    /* 2. 专属视窗水波层：z-index 修正为 0，不再被黑底吞噬 */
+    /* === 选项 E：极客全向纯黑护盾 === */
+    /* 在任何高光水面上，都能形成极冷蓝灰色与锐利的黑色保护力场 */
+    .halo-shield {
+      text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1) !important;
+    }
+
     #water-canvas-layer {
       position: fixed;
       top: 0;
@@ -46,7 +47,6 @@
       pointer-events: none; 
     }
 
-    /* 3. 核心修复：抬升正文与页脚，确保视频、文字全部稳稳浮在水面上 */
     main, footer {
       position: relative;
       z-index: 10;
@@ -55,7 +55,6 @@
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
     #cert-3d-modal, #cert-3d-modal * { cursor: auto !important; }
 
-    /* === 全局冰川冷白光标 === */
     body.hero-mode #cursor-dot { background-color: #ffffff !important; }
     body.hero-mode #cursor-ring { border-color: rgba(255, 255, 255, 0.5) !important; }
     
@@ -93,7 +92,6 @@
     @keyframes heroFadeIn { from { opacity: 0; filter: blur(15px); } to { opacity: 1; filter: blur(0); } }
     .hero-img-load { animation: heroFadeIn 1.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
 
-    /* 恢复极客青高亮 */
     .nav-active { color: white !important; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
     .nav-active span { width: 100% !important; }
     
@@ -220,7 +218,6 @@
             重庆邮电大学 · 通信工程本科
           </h2>
           <div class="inline-flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 mt-2 md:mt-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transform hover:scale-105 transition-transform duration-300">
-            <!-- 恢复极客青 -->
             <span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#00f0ff] animate-pulse shrink-0"></span>
             <span class="text-xs sm:text-sm md:text-lg font-bold tracking-widest text-gray-200 leading-none mt-0.5">
               <span class="text-gray-400 mr-1 md:mr-2">求职方向：</span>研发 / AIGC / 管培生
@@ -237,7 +234,8 @@
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
-        <p class="text-gray-400 font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
+        <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
+        <p class="text-slate-300 halo-shield font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
       </div>
       <div class="relative w-full flex overflow-hidden">
         <div class="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-[#080b1a] to-transparent z-10 pointer-events-none"></div>
@@ -257,7 +255,8 @@
             </h2>
           </div>
           <div class="flex flex-col gap-8 cursor-default">
-            <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed reveal text-justify">
+            <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
+            <p class="text-base md:text-lg text-slate-300 halo-shield font-light leading-relaxed reveal text-justify">
               在学术探索上，拥有省市级大赛获奖经历及名校研学背景；在技术应用上，是 AIGC 领域的早期实践者，能够打破常规，利用前沿 AI 工具实现全链路内容开发与效率破局。兼具出色的动手实践能力与旺盛的求知欲。
             </p>
             <div class="grid grid-cols-2 gap-6 md:gap-8 pt-6 md:pt-8 border-t border-white/10">
@@ -301,25 +300,26 @@
                <i data-lucide="wrench" class="text-[#00f0ff]"></i>
              </div>
              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">硬件/机械工程实操</h3>
-             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
+             <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
+             <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
           </div>
           <div class="group reveal reveal-delay-1 cursor-default">
              <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-5 md:mb-6 group-hover:bg-[#00ff9d]/20 transition-colors">
                <i data-lucide="target" class="text-[#00ff9d]"></i>
              </div>
              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">竞技体育精神</h3>
-             <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
+             <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
+             <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
           </div>
        </div>
     </section>
 
   </main>
-
   <footer id="contact" class="pt-24 md:pt-32 pb-8 border-t border-white/10 bg-transparent relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 relative z-10">
       <div class="flex flex-col items-center text-center mb-16 md:mb-20 cursor-default">
         <h2 class="text-4xl sm:text-5xl md:text-[6rem] font-black tracking-tighter leading-tight mb-8 reveal">
-          开启 <span class="italic font-serif font-light text-gray-400">无限可能。</span>
+          开启 <span class="italic font-serif font-light text-slate-400">无限可能。</span>
         </h2>
         
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 reveal reveal-delay-1 w-full max-w-sm sm:max-w-none mx-auto justify-center">
@@ -335,64 +335,74 @@
         </div>
       </div>
       
-      <div class="flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-gray-500 pt-8 border-t border-white/10 gap-4 cursor-default text-center">
-        <p>来自 浙江</p>
-        <p>&copy; 2026 Dong Yiming. 保留所有权利。</p>
+      <div class="flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-slate-400 pt-8 border-t border-white/10 gap-4 cursor-default text-center">
+        <p class="halo-shield">来自 浙江</p>
+        <p class="halo-shield">&copy; 2026 Dong Yiming. 保留所有权利。</p>
       </div>
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎：视窗级固定隔离 + 雷达智能渐隐 + 坐标系修正 -->
+  <!-- 初始化水波纹引擎：包含单向门机制、250ms提速与相对坐标修正 -->
   <script>
+    let isHeroDestroyed = false; // 全局单向门状态锁
+
     $(document).ready(function() {
       try {
         const $waterLayer = $('#water-canvas-layer');
         
-        // 1. 将引擎挂载到全新的“视窗级专属固定层”上，彻底切断全屏重绘卡顿
         $waterLayer.ripples({
           resolution: 800,
           dropRadius: 20,
           perturbance: 0.04,
-          interactive: false // 依然关闭原生高频暴走触发
+          interactive: false
         });
 
         let isReady = false;
         let lastDropTime = 0;
 
-        // 2. 800ms 刷新护盾，完美屏蔽页面初始化的幽灵水波
         setTimeout(() => {
           isReady = true;
         }, 800);
 
-        // 3. 【视觉雷达】：监听滚动，实现无缝丝滑转场
         $(window).on('scroll', function() {
-          // 当滚动跨过首页（设定界限为 0.8 个屏幕高度）时，水波层渐渐浮现
+          // 【空间折叠核心逻辑】：判断是否已经滑过 300vh 的首页
+          const heroHeight = window.innerHeight * 3;
+          if (!isHeroDestroyed && window.scrollY >= heroHeight) {
+            // 彻底拔除首页 DOM 节点
+            $('#hero-container').remove();
+            // 在同一帧补偿滚动高度差，视觉上绝对无感
+            window.scrollBy(0, -heroHeight);
+            isHeroDestroyed = true;
+          }
+
+          // 单向门触发后，水面永远保持 100% 接管状态
+          if (isHeroDestroyed) {
+             $waterLayer.css('opacity', '1');
+             return;
+          }
+
           if (window.scrollY > window.innerHeight * 0.8) {
             $waterLayer.css('opacity', '1');
           } else {
-            // 在首页区域，水波层完全透明，让森林视差能完美没入底层极客黑
             $waterLayer.css('opacity', '0');
           }
         });
         
-        // 初始化时立刻触发一次雷达扫描，确保刷新在首屏时水波层是隐藏的
         $(window).trigger('scroll');
 
-        // 4. 【交互雷达】：监听鼠标移动，采用相对坐标系
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
 
-          // 核心拦截：如果还在首页区域，直接切断水波计算，绝不浪费显卡哪怕 1% 的性能
-          if (window.scrollY <= window.innerHeight * 0.8) {
+          // 仅当首页未销毁且在首页区域时，才拦截水波
+          if (!isHeroDestroyed && window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
 
           const now = Date.now();
-          // 500ms 极致防卡顿冷却阀（一秒最多触发2次）
-          if (now - lastDropTime > 500) {
+          // 【250ms极限节流阀】：一秒触发4次，兼顾丝滑连贯与极低开销
+          if (now - lastDropTime > 250) {
             lastDropTime = now;
             try {
-              // 【核心坐标修复】：因为水波层是 fixed 固定的，必须将绝对坐标 pageX/Y 替换为视窗相对坐标 clientX/Y，否则水波会跑到屏幕外！
               $waterLayer.ripples('drop', e.clientX, e.clientY, 20, 0.04);
             } catch (err) {}
           }
@@ -547,6 +557,11 @@
           />
         ` : '';
 
+        // 【新增需求】：PC端专属静态提示词，精确定位前两张卡片
+        const pcStaticPrompt = (i === 0 || i === 1)
+          ? `<span class="hidden md:inline-flex text-[#00ff9d] text-xs font-bold tracking-widest ml-2"> &lt; 移动到此处查看 &gt; </span>`
+          : '';
+
         const mobilePrompt = (i === 0 || i === 1) 
           ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
           : '';
@@ -575,7 +590,8 @@
             </div>
             <div>
               <h3 class="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 tracking-tight">${comp.title}</h3>
-              <p class="text-gray-400 font-light leading-relaxed text-sm md:text-base inline">${comp.desc}</p>${actionBtn}
+              <!-- 注入选项 E：冷蓝灰 + halo-shield 护盾 -->
+              <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base inline">${comp.desc}</p>${pcStaticPrompt}${actionBtn}
               ${mobilePrompt}
             </div>
           </div>
@@ -639,7 +655,8 @@
             <div class="md:col-span-8 relative">
               <ul class="space-y-3 md:space-y-4">
                 ${exp.bullets.map(bullet => `
-                  <li class="flex items-start gap-2 md:gap-3 text-gray-400 font-light text-sm md:text-base leading-relaxed">
+                  <!-- 注入选项 E：冷蓝灰 + halo-shield 护盾 -->
+                  <li class="flex items-start gap-2 md:gap-3 text-slate-300 halo-shield font-light text-sm md:text-base leading-relaxed">
                     <i data-lucide="check-circle-2" class="w-4 h-4 md:w-5 md:h-5 mt-0.5 text-[#00f0ff] shrink-0 opacity-70"></i>
                     <span>${bullet}</span>
                   </li>
@@ -712,26 +729,28 @@
       });
 
       function animateParallax() {
-        targetX += (mouseX - targetX) * 0.05; 
-        targetY += (mouseY - targetY) * 0.05;
+        if (!isHeroDestroyed) {
+          targetX += (mouseX - targetX) * 0.05; 
+          targetY += (mouseY - targetY) * 0.05;
 
-        if (window.scrollY < window.innerHeight * 1.5) {
-          const isMobile = window.innerWidth < 768;
-          const scaleBg = isMobile ? 1.02 : 1.05;
-          const scaleMg = isMobile ? 1.05 : 1.15;
-          const scaleFg = isMobile ? 1.05 : 1.2;
-          const moveDamp = isMobile ? 0.3 : 1; 
+          if (window.scrollY < window.innerHeight * 1.5) {
+            const isMobile = window.innerWidth < 768;
+            const scaleBg = isMobile ? 1.02 : 1.05;
+            const scaleMg = isMobile ? 1.05 : 1.15;
+            const scaleFg = isMobile ? 1.05 : 1.2;
+            const moveDamp = isMobile ? 0.3 : 1; 
 
-          if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
-          if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
-          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
-          if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
-          
-          if (sciFiVideo && isVideoEnded) {
-            videoWeight += (1 - videoWeight) * 0.03; 
-            const curX = targetX * 15 * videoWeight * moveDamp;
-            const curY = targetY * 15 * videoWeight * moveDamp;
-            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
+            if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
+            if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
+            if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
+            if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
+            
+            if (sciFiVideo && isVideoEnded) {
+              videoWeight += (1 - videoWeight) * 0.03; 
+              const curX = targetX * 15 * videoWeight * moveDamp;
+              const curY = targetY * 15 * videoWeight * moveDamp;
+              sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
+            }
           }
         }
         requestAnimationFrame(animateParallax);
@@ -739,6 +758,14 @@
       animateParallax();
 
       function handleScrollState() {
+        if (isHeroDestroyed) {
+          // 首页销毁后，取消 hero 模式的特殊样式处理
+          document.body.classList.remove('hero-mode');
+          nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+          nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+          return;
+        }
+
         const scrollY = window.scrollY;
         
         if (scrollY < window.innerHeight * 0.4) {
@@ -878,7 +905,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染：纯黑深渊 + 9000星尘 + 玻璃拟态降噪反光 + 向前跃出修正 -->
+  <!-- 3D 展厅渲染代码原样保留，确保持续可用 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -1009,7 +1036,6 @@
                         float glow = smoothstep(0.6, 0.0, dist) * hoverState; 
                         vec3 glowColor = vec3(0.88, 1.0, 1.0); 
                         
-                        // 修正：光晕强度压制至 0.35
                         diffuseColor.rgb += glowColor * glow * 0.35; 
                     #endif
                     `
