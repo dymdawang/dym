@@ -191,7 +191,7 @@
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500">
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover"></video>
+          <video id="sci-fi-video" crossorigin="anonymous" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover"></video>
           <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
         </div>
 
@@ -338,8 +338,8 @@
   </footer>
 
   <script>
-    let isForestPermanentlyHidden = false; // 森林物理抹除锁
-    let isHeroRingExpanding = false;       // 【新增】3D光环引爆锁
+    let isForestPermanentlyHidden = false; 
+    let isHeroRingExpanding = false;       
 
     $(document).ready(function() {
       try {
@@ -369,14 +369,11 @@
         
         $(window).trigger('scroll');
 
-        // 150ms 高频清爽水波
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
-          
           if (!isForestPermanentlyHidden && window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
-
           const now = Date.now();
           if (now - lastDropTime > 150) {
             lastDropTime = now;
@@ -385,9 +382,8 @@
             } catch (err) {}
           }
         });
-
       } catch (e) {
-        console.error("Ripples engine initialization failed:", e);
+        console.error("Ripples engine failed:", e);
       }
     });
   </script>
@@ -450,7 +446,6 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
-      
       const cursorDot = document.getElementById('cursor-dot');
       const cursorRing = document.getElementById('cursor-ring');
       
@@ -687,7 +682,7 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互交接点】：监听视频播放完毕，触发 3D 全息星环接管
+      // 【核心交互触发：视频结束时无缝对接全息星环】
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
@@ -699,11 +694,11 @@
              heroVideoLayer.style.opacity = 0;
           }
           
-          // 唤醒 3D 引擎容器
+          // 唤醒 3D 引擎，全息头像在此刻无缝接管视觉
           const container3D = document.getElementById('hero-3d-canvas-container');
           if (container3D) container3D.style.opacity = 1;
 
-          // 解锁 3D 光环扩张动画与视差接管
+          // 引爆星环
           isHeroRingExpanding = true;
         });
       }
@@ -720,7 +715,6 @@
         targetX += (mouseX - targetX) * 0.05; 
         targetY += (mouseY - targetY) * 0.05;
 
-        // 如果还没被 3D 引擎接管，原生 2D 视频依然需要微弱的视差跟随
         if (sciFiVideo && isVideoEnded && !isHeroRingExpanding) {
             const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
             const scaleBg = window.innerWidth < 768 ? 1.02 : 1.05;
@@ -775,7 +769,6 @@
 
         if (isForestPermanentlyHidden) {
           document.body.classList.remove('hero-mode');
-          // 仅在 3D 星环未激活前，依靠原生 2D 视频做视觉底衬
           if (heroVideoLayer && !isHeroRingExpanding) {
              heroVideoLayer.style.opacity = 1;
           }
@@ -816,7 +809,6 @@
           forestWrapper.style.transform = `scale(${1 + progress * 0.05}) translateY(${progress * 30}px)`;
         }
 
-        // 仅当没进入 3D 时，控制原生视频渐显
         if(heroVideoLayer && !isHeroRingExpanding) {
           heroVideoLayer.style.opacity = Math.min(progress * 1.5, 1);
         }
@@ -1231,7 +1223,6 @@
     let heroRingUniforms;
     let heroTargetX = 0, heroTargetY = 0;
 
-    // 独立的高频鼠标雷达，专供 3D 星环视差使用
     window.addEventListener('mousemove', (e) => {
       heroTargetX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
       heroTargetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
@@ -1243,7 +1234,6 @@
 
       hero3DScene = new THREE.Scene();
       
-      // FOV 45, 相机距离 1000 (标准电影级透视)
       hero3DCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 3000);
       hero3DCamera.position.z = 1000;
 
@@ -1255,35 +1245,43 @@
       hero3DGroup = new THREE.Group();
       hero3DScene.add(hero3DGroup);
 
-      // 1. 全息头像挡板 (将 2D 截屏转化为悬浮的 3D 层)
-      // 根据一般的 16:9 比例，计算大小以撑满屏幕大部分区域
-      const aspect = window.innerWidth / window.innerHeight;
-      const planeHeight = 828; 
-      const planeWidth = planeHeight * aspect;
+      // 1. VideoTexture 实时劫持：直接读取 HTML 里的 video 并投射到 3D 空间！
+      const videoElement = document.getElementById('sci-fi-video');
+      const avatarTex = new THREE.VideoTexture(videoElement);
+      avatarTex.minFilter = THREE.LinearFilter;
+      avatarTex.magFilter = THREE.LinearFilter;
+
+      // 智能计算自适应面板大小（完美复现 object-cover）
+      const screenAspect = window.innerWidth / window.innerHeight;
+      const videoAspect = 16 / 9; 
+      let planeWidth, planeHeight;
+      if (screenAspect > videoAspect) {
+          planeWidth = 828 * screenAspect;
+          planeHeight = planeWidth / videoAspect;
+      } else {
+          planeHeight = 828;
+          planeWidth = planeHeight * videoAspect;
+      }
       const planeGeo = new THREE.PlaneGeometry(planeWidth, planeHeight);
       
-      const texLoader = new THREE.TextureLoader();
-      // 【关键】：请确保同级目录下有这张图片！如果加载失败可能全黑。
-      const avatarTex = texLoader.load('./fixed_avatar.png', undefined, undefined, function(err) {
-         console.warn("未找到 fixed_avatar.png，3D头像挡板将无法显示。请截图并放入同级目录。");
-      }); 
-      
+      // 【黑科技着色】：使用 AdditiveBlending 加色混合，瞬间让纯黑背景消融，只留绿色人头！
       const planeMat = new THREE.MeshBasicMaterial({ 
         map: avatarTex, 
         transparent: true,
-        depthWrite: false // 防止与光圈模型发生闪烁冲突
+        blending: THREE.AdditiveBlending, 
+        depthWrite: false 
       });
       const avatarMesh = new THREE.Mesh(planeGeo, planeMat);
       hero3DGroup.add(avatarMesh);
 
-      // 2. 连续液态发光星环 (霸占屏幕 80% 的宏大感)
-      const ringGeo = new THREE.TorusGeometry(331, 14, 64, 128);
+      // 2. 重写的超清史诗级液态星环（占据 80%）
+      const ringGeo = new THREE.TorusGeometry(331, 35, 64, 200); 
       
       heroRingUniforms = {
           time: { value: 0 },
-          colorDeep: { value: new THREE.Color(0x0a4a40) },     // 提取色：深海幽绿
-          colorEmerald: { value: new THREE.Color(0x00ff9d) },  // 提取色：荧光翠绿
-          colorGlow: { value: new THREE.Color(0xd4ff00) }      // 提取色：边缘微黄高光
+          colorDeep: { value: new THREE.Color(0x063b33) },    // 深海幽绿
+          colorEmerald: { value: new THREE.Color(0x00ff9d) }, // 荧光翠绿
+          colorGlow: { value: new THREE.Color(0xefff66) }     // 边缘微黄高光
       };
 
       const ringMat = new THREE.ShaderMaterial({
@@ -1311,31 +1309,37 @@
               varying vec3 vViewPosition;
               
               void main() {
-                  // 生成液态流体波动
-                  float wave = sin(vUv.x * 20.0 + time * 1.5) * cos(vUv.y * 20.0 - time * 1.2);
-                  vec3 baseColor = mix(colorDeep, colorEmerald, (wave + 1.0) * 0.5);
+                  // 复杂正弦波流体置换
+                  vec2 uv = vUv * vec2(12.0, 3.0);
+                  float wave1 = sin(uv.x + time * 2.0) * cos(uv.y - time * 1.5);
+                  float wave2 = sin(uv.x * 0.8 - time) * cos(uv.y * 2.5 + time * 0.8);
+                  float n = (wave1 + wave2 + 2.0) * 0.25; 
                   
-                  // 计算菲涅尔边缘高光
+                  // 深度混色
+                  vec3 color = mix(colorDeep, colorEmerald, smoothstep(0.2, 0.7, n));
+                  color = mix(color, colorGlow, smoothstep(0.8, 1.0, n));
+                  
+                  // 液态玻璃折射菲涅尔
                   vec3 normal = normalize(vNormal);
                   vec3 viewDir = normalize(vViewPosition);
-                  float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 1.5);
+                  float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.0);
+                  color += colorGlow * fresnel * 0.9;
                   
-                  vec3 finalColor = mix(baseColor, colorGlow, fresnel * 0.85);
+                  // 柔和羽化边缘
+                  float alpha = smoothstep(0.0, 0.4, n) * 0.8 + 0.2;
                   
-                  gl_FragColor = vec4(finalColor, 0.95);
+                  gl_FragColor = vec4(color, alpha);
               }
           `,
           transparent: true,
+          blending: THREE.AdditiveBlending, // 加色高光模式
           depthWrite: false,
           side: THREE.DoubleSide
       });
 
       heroRing = new THREE.Mesh(ringGeo, ringMat);
-      
-      // 初始状态极小，等待爆发
       heroRing.scale.set(0.01, 0.01, 0.01);
-      // 将光圈倾斜，切过平面
-      heroRing.rotation.x = Math.PI * 0.4; 
+      heroRing.rotation.x = Math.PI * 0.4; // 霸气切入
 
       hero3DGroup.add(heroRing);
       
@@ -1347,16 +1351,14 @@
       requestAnimationFrame(animateHero3D);
       if(heroRingUniforms) heroRingUniforms.time.value += 0.015;
 
-      // 爆发动画：直到 scale 1.0 (占据约 80% 视野)
       if (isHeroRingExpanding && heroRing && heroRing.scale.x < 0.999) {
           heroRing.scale.lerp(new THREE.Vector3(1, 1, 1), 0.035);
       }
       
       if (heroRing) {
-          heroRing.rotation.z += 0.001; // 微弱的自转
+          heroRing.rotation.z += 0.001; 
       }
 
-      // 3D 视差接管 (当 3D 开始发力时)
       if (hero3DGroup && isHeroRingExpanding) {
           curRotX += ((heroTargetY * 0.25) - curRotX) * 0.05;
           curRotY += ((heroTargetX * 0.25) - curRotY) * 0.05;
