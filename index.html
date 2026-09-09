@@ -27,7 +27,6 @@
     }
 
     /* === 选项 E：极客全向纯黑护盾 === */
-    /* 在任何高光水面上，都能形成极冷蓝灰色与锐利的黑色保护力场 */
     .halo-shield {
       text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,1) !important;
     }
@@ -102,10 +101,8 @@
 </head>
 <body>
 
-  <!-- 新增：被物理隔离的独立水波与背景渲染层 -->
   <div id="water-canvas-layer"></div>
 
-  <!-- 光标中心点与圆环 -->
   <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#e0ffff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
   <div id="cursor-ring" class="fixed top-0 left-0 w-8 h-8 border-2 border-[#e0ffff]/50 rounded-full pointer-events-none z-[9999] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block"></div>
 
@@ -234,7 +231,6 @@
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
-        <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
         <p class="text-slate-300 halo-shield font-medium uppercase tracking-widest text-xs md:text-sm reveal">核心技术栈与工具</p>
       </div>
       <div class="relative w-full flex overflow-hidden">
@@ -255,7 +251,6 @@
             </h2>
           </div>
           <div class="flex flex-col gap-8 cursor-default">
-            <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
             <p class="text-base md:text-lg text-slate-300 halo-shield font-light leading-relaxed reveal text-justify">
               在学术探索上，拥有省市级大赛获奖经历及名校研学背景；在技术应用上，是 AIGC 领域的早期实践者，能够打破常规，利用前沿 AI 工具实现全链路内容开发与效率破局。兼具出色的动手实践能力与旺盛的求知欲。
             </p>
@@ -300,7 +295,6 @@
                <i data-lucide="wrench" class="text-[#00f0ff]"></i>
              </div>
              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">硬件/机械工程实操</h3>
-             <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
              <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base text-justify">极度热爱智能硬件与机械部件的拆解与组装，拥有独立拼装模拟车辆变相装置的经验，具备出色的空间结构思维与极强的动手微操能力。</p>
           </div>
           <div class="group reveal reveal-delay-1 cursor-default">
@@ -308,7 +302,6 @@
                <i data-lucide="target" class="text-[#00ff9d]"></i>
              </div>
              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-white">竞技体育精神</h3>
-             <!-- 注入了 text-slate-300 与 halo-shield 护盾 -->
              <p class="text-slate-300 halo-shield font-light leading-relaxed text-sm md:text-base text-justify">乒乓球狂热爱好者及资深玩家。通过长期高强度的训练，不仅练就了过硬的身体素质，更培养了在面对复杂局面时极强的抗压能力、专注力与战略决断力。</p>
           </div>
        </div>
@@ -342,7 +335,7 @@
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎：包含单向门机制、250ms提速与相对坐标修正 -->
+  <!-- 核心交互脚本：修正版空间折叠（金蝉脱壳）引擎 -->
   <script>
     let isHeroDestroyed = false; // 全局单向门状态锁
 
@@ -365,17 +358,23 @@
         }, 800);
 
         $(window).on('scroll', function() {
-          // 【空间折叠核心逻辑】：判断是否已经滑过 300vh 的首页
-          const heroHeight = window.innerHeight * 3;
-          if (!isHeroDestroyed && window.scrollY >= heroHeight) {
-            // 彻底拔除首页 DOM 节点
-            $('#hero-container').remove();
-            // 在同一帧补偿滚动高度差，视觉上绝对无感
-            window.scrollBy(0, -heroHeight);
-            isHeroDestroyed = true;
+          // 【空间折叠 2.0】：当滑过 2.1 屏（森林彻底隐形、科技感全透）时触发
+          const foldThreshold = window.innerHeight * 2.1;
+          const foldOffset = window.innerHeight * 2; // 需要补偿的 200vh 落差
+
+          if (!isHeroDestroyed && window.scrollY >= foldThreshold) {
+            // 1. 精准切割：只抹除森林图层与欢迎词，绝对保留科技视频与介绍！
+            $('#forest-wrapper, #hero-text-initial').remove();
+            
+            // 2. 维度压缩：将超长容器还原为 100vh 单屏
+            $('#hero-container').removeClass('h-[300vh]').addClass('h-[100vh]');
+            
+            // 3. 视觉补偿：无缝抹平 200vh 落差，视觉绝对无感
+            window.scrollBy(0, -foldOffset);
+            
+            isHeroDestroyed = true; // 永久锁死状态
           }
 
-          // 单向门触发后，水面永远保持 100% 接管状态
           if (isHeroDestroyed) {
              $waterLayer.css('opacity', '1');
              return;
@@ -393,13 +392,11 @@
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
 
-          // 仅当首页未销毁且在首页区域时，才拦截水波
           if (!isHeroDestroyed && window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
 
           const now = Date.now();
-          // 【250ms极限节流阀】：一秒触发4次，兼顾丝滑连贯与极低开销
           if (now - lastDropTime > 250) {
             lastDropTime = now;
             try {
@@ -729,44 +726,57 @@
       });
 
       function animateParallax() {
-        if (!isHeroDestroyed) {
-          targetX += (mouseX - targetX) * 0.05; 
-          targetY += (mouseY - targetY) * 0.05;
+        targetX += (mouseX - targetX) * 0.05; 
+        targetY += (mouseY - targetY) * 0.05;
 
-          if (window.scrollY < window.innerHeight * 1.5) {
-            const isMobile = window.innerWidth < 768;
-            const scaleBg = isMobile ? 1.02 : 1.05;
-            const scaleMg = isMobile ? 1.05 : 1.15;
-            const scaleFg = isMobile ? 1.05 : 1.2;
-            const moveDamp = isMobile ? 0.3 : 1; 
-
-            if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
-            if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
-            if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
-            if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
-            
-            if (sciFiVideo && isVideoEnded) {
-              videoWeight += (1 - videoWeight) * 0.03; 
-              const curX = targetX * 15 * videoWeight * moveDamp;
-              const curY = targetY * 15 * videoWeight * moveDamp;
-              sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
-            }
-          }
+        // 【优化细节】：即便森林被毁，酷炫的科技视频依然拥有视差跟随！
+        if (sciFiVideo && isVideoEnded) {
+            const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
+            const scaleBg = window.innerWidth < 768 ? 1.02 : 1.05;
+            videoWeight += (1 - videoWeight) * 0.03; 
+            const curX = targetX * 15 * videoWeight * moveDamp;
+            const curY = targetY * 15 * videoWeight * moveDamp;
+            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
         }
+
+        // 仅在森林未被销毁时计算自然视差
+        if (!isHeroDestroyed && window.scrollY < window.innerHeight * 1.5) {
+          const isMobile = window.innerWidth < 768;
+          const scaleBg = isMobile ? 1.02 : 1.05;
+          const scaleMg = isMobile ? 1.05 : 1.15;
+          const scaleFg = isMobile ? 1.05 : 1.2;
+          const moveDamp = isMobile ? 0.3 : 1; 
+
+          if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
+          if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
+          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
+          if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
+        }
+        
         requestAnimationFrame(animateParallax);
       }
       animateParallax();
 
       function handleScrollState() {
-        if (isHeroDestroyed) {
-          // 首页销毁后，取消 hero 模式的特殊样式处理
-          document.body.classList.remove('hero-mode');
-          nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
-          nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
-          return;
-        }
-
         const scrollY = window.scrollY;
+
+        // 【核心状态固化】：一旦完成折叠，强制锁定科技主页清晰度
+        if (isHeroDestroyed) {
+          document.body.classList.remove('hero-mode');
+          if (heroVideoLayer) heroVideoLayer.style.opacity = 1;
+          if (heroTextFinal) {
+            heroTextFinal.style.opacity = 1;
+            heroTextFinal.style.transform = `scale(1) translateY(0px)`;
+          }
+          if (scrollY > 50) {
+            nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+            nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+          } else {
+            nav.classList.remove('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
+            nav.classList.add('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
+          }
+          return; // 终止下方基于未折叠状态的计算
+        }
         
         if (scrollY < window.innerHeight * 0.4) {
           document.body.classList.add('hero-mode');
@@ -905,7 +915,7 @@
     });
   </script>
 
-  <!-- 3D 展厅渲染代码原样保留，确保持续可用 -->
+  <!-- 3D 展厅渲染代码原封不动，完美保留 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
