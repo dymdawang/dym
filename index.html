@@ -20,18 +20,30 @@
     
     html { scroll-behavior: smooth; }
 
-    /* 全局背景挂载 4.jpg，固定视差水底（最稳定的底层结构） */
+    /* 1. 净化 body：剥离背景图，恢复极客纯黑，完美保住首页暗场过渡 */
     body {
       font-family: 'Outfit', sans-serif;
-      background-color: #080b1a;
-      background-image: url('./4.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      background-color: #080b1a; 
       color: white;
       overflow-x: hidden;
       margin: 0;
       padding: 0;
+    }
+
+    /* 2. 新增：永远只有 100vh 大小的专属视窗水波层（绝对不卡顿） */
+    #water-canvas-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      background-image: url('./4.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0; /* 初始完全透明，隔离首页 */
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1); /* 电影级丝滑渐现 */
+      pointer-events: none; /* 事件穿透，绝不影响网页按钮点击 */
     }
 
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
@@ -85,6 +97,9 @@
   </style>
 </head>
 <body>
+
+  <!-- 新增：被物理隔离的独立水波与背景渲染层 -->
+  <div id="water-canvas-layer"></div>
 
   <!-- 光标中心点与圆环 -->
   <div id="cursor-dot" class="fixed top-0 left-0 w-2 h-2 bg-[#e0ffff] rounded-full pointer-events-none z-[10000] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ease-out hidden md:block"></div>
@@ -321,42 +336,58 @@
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎：纯软件高度拦截版 (完美融合稳定与逻辑) -->
+  <!-- 初始化水波纹引擎：视窗级固定隔离 + 雷达智能渐隐 + 坐标系修正 -->
   <script>
     $(document).ready(function() {
       try {
-        const $body = $('body');
+        const $waterLayer = $('#water-canvas-layer');
         
-        // 彻底关闭原生的高频触发，接管底层逻辑
-        $body.ripples({
+        // 1. 将引擎挂载到全新的“视窗级专属固定层”上，彻底切断全屏重绘卡顿
+        $waterLayer.ripples({
           resolution: 800,
           dropRadius: 20,
           perturbance: 0.04,
-          interactive: false 
+          interactive: false // 依然关闭原生高频暴走触发
         });
 
         let isReady = false;
         let lastDropTime = 0;
 
-        // 800ms 护盾：完美隔绝页面初始刷新的幽灵水波
+        // 2. 800ms 刷新护盾，完美屏蔽页面初始化的幽灵水波
         setTimeout(() => {
           isReady = true;
         }, 800);
 
-        // 智能交互雷达：500ms 极致防卡顿 + 高度识别隔离
-        $body.on('mousemove', function(e) {
+        // 3. 【视觉雷达】：监听滚动，实现无缝丝滑转场
+        $(window).on('scroll', function() {
+          // 当滚动跨过首页（设定界限为 0.8 个屏幕高度）时，水波层渐渐浮现
+          if (window.scrollY > window.innerHeight * 0.8) {
+            $waterLayer.css('opacity', '1');
+          } else {
+            // 在首页区域，水波层完全透明，让森林视差能完美没入底层极客黑
+            $waterLayer.css('opacity', '0');
+          }
+        });
+        
+        // 初始化时立刻触发一次雷达扫描，确保刷新在首屏时水波层是隐藏的
+        $(window).trigger('scroll');
+
+        // 4. 【交互雷达】：监听鼠标移动，采用相对坐标系
+        $(document).on('mousemove', function(e) {
           if (!isReady) return; 
 
-          // 【核心拦截逻辑】：如果用户的滚动条位置还在首屏视差区以内（< 1.2个屏幕高度），直接拦截事件！首页绝对无水波。
-          if (window.scrollY < window.innerHeight * 1.2) {
+          // 核心拦截：如果还在首页区域，直接切断水波计算，绝不浪费显卡哪怕 1% 的性能
+          if (window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
 
           const now = Date.now();
+          // 500ms 极致防卡顿冷却阀（一秒最多触发2次）
           if (now - lastDropTime > 500) {
             lastDropTime = now;
             try {
-              $body.ripples('drop', e.pageX, e.pageY, 20, 0.04);
+              // 【核心坐标修复】：因为水波层是 fixed 固定的，必须将绝对坐标 pageX/Y 替换为视窗相对坐标 clientX/Y，否则水波会跑到屏幕外！
+              $waterLayer.ripples('drop', e.clientX, e.clientY, 20, 0.04);
             } catch (err) {}
           }
         });
