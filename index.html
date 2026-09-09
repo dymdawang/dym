@@ -321,16 +321,43 @@
     </div>
   </footer>
 
-  <!-- 初始化水波纹引擎：挂载到 body，分辨率设定为 800，突破底层事件拦截 -->
+  <!-- 初始化水波纹引擎：已加入 500ms 节流限制 + 20px 恢复半径 + 800ms 刷新护盾 -->
   <script>
     $(document).ready(function() {
       try {
-        $('body').ripples({
+        const $body = $('body');
+        
+        // 1. 初始化引擎：彻底关闭原生的暴走高频触发 (interactive: false)
+        $body.ripples({
           resolution: 800,
           dropRadius: 20,
           perturbance: 0.04,
-          interactive: true
+          interactive: false 
         });
+
+        // 2. 状态锁：定义防误触护盾与节流阀计时器
+        let isReady = false;
+        let lastDropTime = 0;
+
+        // 3. 开启 800ms 刷新护盾：彻底隔绝刚进页面时的幽灵水波事件
+        setTimeout(() => {
+          isReady = true;
+        }, 800);
+
+        // 4. 自定义交互监听：500ms 冷却（一秒最多触发2次），彻底根除 GPU 过载
+        $body.on('mousemove', function(e) {
+          if (!isReady) return; // 护盾期间无视一切动作
+
+          const now = Date.now();
+          if (now - lastDropTime > 500) {
+            lastDropTime = now;
+            try {
+              // 手动触发水波，半径维持大气的 20
+              $body.ripples('drop', e.pageX, e.pageY, 20, 0.04);
+            } catch (err) {}
+          }
+        });
+
       } catch (e) {
         console.error("Ripples engine initialization failed:", e);
       }
@@ -480,7 +507,6 @@
           />
         ` : '';
 
-        // 还原 UI 为极客青/翠绿
         const mobilePrompt = (i === 0 || i === 1) 
           ? `<div class="mt-2 text-[#00ff9d] text-xs font-bold tracking-widest md:hidden">&lt; 点击卡片查看证明材料 &gt;</div>`
           : '';
@@ -943,7 +969,7 @@
                         float glow = smoothstep(0.6, 0.0, dist) * hoverState; 
                         vec3 glowColor = vec3(0.88, 1.0, 1.0); 
                         
-                        // 修正：光晕强度压制至 0.35 解决刺眼问题
+                        // 修正：光晕强度压制至 0.35
                         diffuseColor.rgb += glowColor * glow * 0.35; 
                     #endif
                     `
@@ -1070,7 +1096,6 @@
           matData.hoverState.value += (mesh.userData.targetHoverState - matData.hoverState.value) * 0.15;
 
           if (matData.hoverState.value > 0.01) {
-              // 修正：悬停时向正前方跃出
               mesh.position.z += (30 - mesh.position.z) * 0.15; 
               border.material.color.setHex(0xe0ffff);
               border.material.opacity = matData.hoverState.value;
