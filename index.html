@@ -20,7 +20,7 @@
     
     html { scroll-behavior: smooth; }
 
-    /* 1. 净化 body：剥离背景图，恢复极客纯黑，完美保住首页暗场过渡 */
+    /* 1. 净化 body：剥离背景图，恢复极客黑底色，确保首页暗场完美过渡 */
     body {
       font-family: 'Outfit', sans-serif;
       background-color: #080b1a; 
@@ -30,20 +30,26 @@
       padding: 0;
     }
 
-    /* 2. 新增：永远只有 100vh 大小的专属视窗水波层（绝对不卡顿） */
+    /* 2. 专属视窗水波层：z-index 修正为 0，不再被黑底吞噬 */
     #water-canvas-layer {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: -1;
+      z-index: 0; 
       background-image: url('./4.jpg');
       background-size: cover;
       background-position: center;
-      opacity: 0; /* 初始完全透明，隔离首页 */
-      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1); /* 电影级丝滑渐现 */
-      pointer-events: none; /* 事件穿透，绝不影响网页按钮点击 */
+      opacity: 0; 
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1); 
+      pointer-events: none; 
+    }
+
+    /* 3. 核心修复：抬升正文与页脚，确保视频、文字全部稳稳浮在水面上 */
+    main, footer {
+      position: relative;
+      z-index: 10;
     }
 
     @media (hover: hover) and (pointer: fine) { * { cursor: none !important; } }
