@@ -153,7 +153,6 @@
         </a>
       </div>
 
-      <!-- 电脑端：下载按钮已删除，打印按钮升级为青绿色渐变强视觉焦点样式 -->
       <div class="hidden md:flex items-center gap-3">
         <button onclick="window.print()" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
           <i data-lucide="printer" class="w-4 h-4"></i>
@@ -166,7 +165,6 @@
       </button>
     </div>
 
-    <!-- 手机端折叠菜单：已清理掉多余的下载按钮 -->
     <div id="mobile-menu" class="md:hidden overflow-hidden bg-[#1a1f3c]/95 backdrop-blur-2xl border-white/10 rounded-b-3xl h-0 opacity-0 border-t-0">
       <div class="flex flex-col p-6 gap-4">
         <a href="#about" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">关于我</a>
@@ -182,12 +180,19 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 首屏：底层定格 + 钢铁侠六边形鳞片变身转场（完美对齐 scale(1.10) translateY(-6.2%)） -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
           
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline webkit-playsinline="true" x5-playsinline="true" x5-video-player-type="h5-page" preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
+          <svg id="hero-final-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full z-10 pointer-events-none opacity-0" style="transform: scale(1.10) translateY(-6.2%); transition: opacity 0.1s linear, transform 10s ease-out;">
+            <defs>
+              <mask id="hex-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+                <rect width="1920" height="1080" fill="black" />
+                <g id="hex-polygons-group"></g>
+              </mask>
+            </defs>
+            <image id="hero-svg-img" href="./5.jpg" xlink:href="./5.jpg" width="1920" height="1080" preserveAspectRatio="xMidYMid slice" mask="url(#hex-mask)" />
+          </svg>
           
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
@@ -224,8 +229,6 @@
         </div>
       </div>
     </section>
-
-    <!-- ====== 技能、项目等底层内容保持原样 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -334,62 +337,54 @@
     </div>
   </footer>
 
-  <!-- 钢铁侠六边形转场核心算法 JS -->
   <script>
     window.hexPolygons = [];
     
     function initHexMask() {
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.style.position = "absolute";
-        svg.style.width = "0";
-        svg.style.height = "0";
+      const group = document.getElementById('hex-polygons-group');
+      if (!group) return;
+      group.innerHTML = '';
+      window.hexPolygons = [];
 
-        const defs = document.createElementNS(svgNS, "defs");
-        const mask = document.createElementNS(svgNS, "mask");
-        mask.setAttribute("id", "hex-mask");
+      const svgNS = "http://www.w3.org/2000/svg";
+      // 在 1920x1080 矢量空间中划分均匀紧凑的六边形蜂窝
+      const hexRadius = 42; 
+      const hexWidth = hexRadius * 2;
+      const hexHeight = Math.sqrt(3) * hexRadius;
 
-        const hexRadius = window.innerWidth < 768 ? 20 : 35; 
-        const hexWidth = hexRadius * 2;
-        const hexHeight = Math.sqrt(3) * hexRadius;
-        
-        const cols = Math.ceil(window.screen.width * 1.5 / (hexWidth * 0.75));
-        const rows = Math.ceil(window.screen.height * 1.5 / hexHeight);
-        
-        const centerX = window.innerWidth * 0.5;
-        const centerY = window.innerHeight * 0.4;
+      const cols = 36;
+      const rows = 20;
 
-        const hexGroup = document.createElementNS(svgNS, "g");
+      // 锁定中心面部坐标为 (960, 480)
+      const centerX = 960;
+      const centerY = 480;
+      const maxDist = Math.sqrt(Math.pow(960, 2) + Math.pow(600, 2));
 
-        for (let r = -2; r < rows; r++) {
-            for (let c = -2; c < cols; c++) {
-                const x = c * hexWidth * 0.75;
-                const y = r * hexHeight + (c % 2 === 1 ? hexHeight / 2 : 0);
-                
-                const hex = document.createElementNS(svgNS, "polygon");
-                const points = [];
-                for (let i = 0; i < 6; i++) {
-                    const angle_rad = Math.PI / 180 * (60 * i);
-                    points.push(`${x + hexRadius * Math.cos(angle_rad)},${y + hexRadius * Math.sin(angle_rad)}`);
-                }
-                hex.setAttribute("points", points.join(" "));
-                hex.setAttribute("fill", "white");
-                hex.style.opacity = "0"; 
-                
-                const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-                const maxDist = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
-                const delay = (dist / maxDist) * 1200 + (Math.random() * 150); 
-                
-                hexGroup.appendChild(hex);
-                window.hexPolygons.push({ el: hex, delay: delay });
-            }
+      for (let r = -2; r < rows; r++) {
+        for (let c = -2; c < cols; c++) {
+          const x = c * hexWidth * 0.75;
+          const y = r * hexHeight + (c % 2 === 1 ? hexHeight / 2 : 0);
+
+          const hex = document.createElementNS(svgNS, "polygon");
+          const points = [];
+          for (let i = 0; i < 6; i++) {
+            const angle_rad = Math.PI / 180 * (60 * i);
+            points.push(`${(x + hexRadius * Math.cos(angle_rad)).toFixed(1)},${(y + hexRadius * Math.sin(angle_rad)).toFixed(1)}`);
+          }
+          hex.setAttribute("points", points.join(" "));
+          hex.setAttribute("fill", "white");
+          hex.style.opacity = "0";
+          hex.style.transition = "opacity 0.22s ease-in";
+
+          const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+          const delay = (dist / maxDist) * 1100 + (Math.random() * 120);
+
+          group.appendChild(hex);
+          window.hexPolygons.push({ el: hex, delay: delay });
         }
-        mask.appendChild(hexGroup);
-        defs.appendChild(mask);
-        svg.appendChild(defs);
-        document.body.appendChild(svg);
+      }
     }
-    
+
     document.addEventListener("DOMContentLoaded", initHexMask);
   </script>
 
@@ -739,31 +734,49 @@
 
       let hasVideoStarted = false;
       let isVideoEnded = false;
+      let isTransitionTriggered = false;
       let videoWeight = 0;
 
-      // 【核心交互交接点】：极客级“钢铁侠鳞片蔓延”触发引擎
+      // 【核心交互交接点】：双保险触发机制，确保移动端 100% 引爆六边形扩散
+      function triggerHexTransition() {
+        if (isTransitionTriggered) return;
+        isTransitionTriggered = true;
+        isVideoEnded = true;
+
+        const finalSvg = document.getElementById('hero-final-svg');
+        const heroSvgImg = document.getElementById('hero-svg-img');
+
+        if (finalSvg) {
+          finalSvg.style.opacity = "1";
+          
+          if (window.hexPolygons) {
+            window.hexPolygons.forEach(p => {
+              setTimeout(() => {
+                p.el.style.opacity = "1";
+              }, p.delay);
+            });
+          }
+
+          // 保持精准对齐的同时赋予 10 秒慢呼吸
+          finalSvg.style.transform = "scale(1.13) translateY(-6.2%)";
+
+          // 1.5 秒后自动移除遮罩属性，作为多平台绝对安全兜底，同时彻底释放手机 GPU 压力
+          setTimeout(() => {
+            if (heroSvgImg) {
+              heroSvgImg.removeAttribute('mask');
+            }
+          }, 1500);
+        }
+      }
+
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
-        sciFiVideo.addEventListener('ended', () => {
-          isVideoEnded = true;
-          
-          const finalImage = document.getElementById('hero-final-image');
-          if (finalImage) {
-             finalImage.style.WebkitMask = "url(#hex-mask)";
-             finalImage.style.mask = "url(#hex-mask)";
-             finalImage.style.opacity = "1";
-             
-             if (window.hexPolygons) {
-                 window.hexPolygons.forEach(p => {
-                     setTimeout(() => {
-                         p.el.style.transition = "opacity 0.25s ease-in";
-                         p.el.style.opacity = "1";
-                     }, p.delay);
-                 });
-             }
-             
-             finalImage.style.transform = "scale(1.13) translateY(-6.2%)";
+        sciFiVideo.addEventListener('ended', triggerHexTransition);
+        // 针对移动端视频解码特性的毫秒级监控兜底
+        sciFiVideo.addEventListener('timeupdate', () => {
+          if (sciFiVideo.duration && sciFiVideo.currentTime >= sciFiVideo.duration - 0.25) {
+            triggerHexTransition();
           }
         });
       }
@@ -841,6 +854,10 @@
             heroTextFinal.style.transform = `scale(1) translateY(0px)`;
           }
           
+          if (!isTransitionTriggered) {
+            triggerHexTransition();
+          }
+
           if (scrollY > 50) {
             nav.classList.add('bg-[#080b1a]/80', 'backdrop-blur-xl', 'shadow-[0_4px_30px_rgba(0,0,0,0.5)]', 'py-2', 'md:py-3', 'border-white/5');
             nav.classList.remove('bg-white/10', 'backdrop-blur-md', 'shadow-[0_8px_32px_rgba(0,0,0,0.15)]', 'border-white/20', 'py-3', 'md:py-4');
@@ -988,7 +1005,6 @@
     });
   </script>
 
-  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
