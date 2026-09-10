@@ -96,6 +96,43 @@
     .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
     .reveal.active { opacity: 1; transform: translateY(0); }
     .reveal-delay-1 { transition-delay: 0.15s; }
+
+    /* 📱 移动端专属沙盒 CSS：彻底接管手机渲染 */
+    @media (max-width: 768px) {
+        /* 强制还原原始大小，找回竖屏全景，避免“显大” */
+        #sci-fi-video { 
+            transform: scale(1) !important; 
+            object-position: 50% 40% !important; 
+        }
+        #hero-video-layer {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh; /* 横竖屏完美自适应高度，消灭黑边 */
+        }
+    }
+
+    /* 移动端专属：电影级光学溶解 + 原生中心放射遮罩（绝对流畅） */
+    @keyframes mobileMaskExpand {
+        0% { -webkit-mask-size: 0% 0%; mask-size: 0% 0%; }
+        100% { -webkit-mask-size: 350% 350%; mask-size: 350% 350%; }
+    }
+    @keyframes mobileOpticalFade {
+        0% { filter: blur(12px) brightness(1.4); }
+        100% { filter: blur(0px) brightness(1); }
+    }
+    .mobile-optical-reveal {
+        opacity: 1 !important;
+        /* 原生光晕圆环：精准对齐面部中心（50% 40%） */
+        -webkit-mask-image: radial-gradient(circle, black 50%, transparent 55%);
+        mask-image: radial-gradient(circle, black 50%, transparent 55%);
+        -webkit-mask-position: 50% 40%;
+        mask-position: 50% 40%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        /* 并行引爆双特效 */
+        animation: mobileMaskExpand 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
+                   mobileOpticalFade 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+    }
   </style>
 </head>
 <body>
@@ -180,13 +217,13 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
+        <div id="hero-video-layer" class="absolute inset-0 origin-center flex items-center justify-center bg-[#080b1a] w-full h-full">
           
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline webkit-playsinline="true" preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
           <img id="hero-final-image-pc" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 hidden md:block" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
           
-          <img id="hero-final-image-mobile" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 md:hidden block" style="transform: scale(1.05); transition: opacity 0.8s ease-in-out, transform 10s ease-out; object-position: center;">
+          <img id="hero-final-image-mobile" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 md:hidden block" style="transform: scale(1); object-position: 50% 40%;">
 
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
@@ -217,9 +254,9 @@
           </div>
         </div>
 
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none">
+        <div class="absolute bottom-10 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none w-full text-center" style="left: 50%; transform: translateX(-50%);">
           <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2 whitespace-nowrap">向下滚动</span>
-          <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5"></i>
+          <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5 mx-auto"></i>
         </div>
       </div>
     </section>
@@ -335,7 +372,7 @@
     window.hexPolygonsPC = [];
     
     function initHexMaskPC() {
-        if (window.innerWidth <= 768) return; // 移动端直接弃用，彻底释放性能
+        if (window.innerWidth <= 768) return; 
         
         const svgNS = "http://www.w3.org/2000/svg";
         let svg = document.getElementById("pc-hex-svg-container");
@@ -357,11 +394,9 @@
         const hexWidth = hexRadius * 2;
         const hexHeight = Math.sqrt(3) * hexRadius;
         
-        // 基于当前视口宽度铺满
         const cols = Math.ceil(window.innerWidth * 1.5 / (hexWidth * 0.75));
         const rows = Math.ceil(window.innerHeight * 1.5 / hexHeight);
         
-        // 精准定义视口中心为扩散原点
         const centerX = window.innerWidth * 0.5;
         const centerY = window.innerHeight * 0.4;
 
@@ -403,6 +438,16 @@
   </script>
 
   <script>
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (window.innerWidth <= 768 || window.innerHeight <= 768) {
+                try { $('#water-canvas-layer').ripples('updateSize'); } catch(e){}
+            }
+        }, 200);
+    });
+  </script>
+
+  <script>
     let isForestPermanentlyHidden = false; 
 
     $(document).ready(function() {
@@ -433,7 +478,8 @@
         
         $(window).trigger('scroll');
 
-        $(document).on('mousemove', function(e) {
+        // 修复点 3：移动端专属水波纹拖尾（touchstart & touchmove 并行拦截）
+        $(document).on('mousemove touchmove touchstart', function(e) {
           if (!isReady) return; 
           
           if (!isForestPermanentlyHidden && window.scrollY <= window.innerHeight * 0.8) {
@@ -441,10 +487,27 @@
           }
 
           const now = Date.now();
-          if (now - lastDropTime > 150) {
+          // 加快响应频率以贴合手指滑动
+          if (now - lastDropTime > 40) {
             lastDropTime = now;
+            let clientX, clientY;
+            let isTouch = e.type.includes('touch');
+
+            if (isTouch) {
+              if (e.originalEvent.touches && e.originalEvent.touches.length > 0) {
+                clientX = e.originalEvent.touches[0].clientX;
+                clientY = e.originalEvent.touches[0].clientY;
+              } else {
+                return;
+              }
+            } else {
+              clientX = e.clientX;
+              clientY = e.clientY;
+            }
+
             try {
-              $waterLayer.ripples('drop', e.clientX, e.clientY, 15, 0.02);
+              // 移动端手指触碰：波纹更大、涟漪更强，绝不被忽略！
+              $waterLayer.ripples('drop', clientX, clientY, isTouch ? 25 : 15, isTouch ? 0.05 : 0.02);
             } catch (err) {}
           }
         });
@@ -750,7 +813,7 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互分离】：彻底切断 PC 端与移动端的互相影响
+      // 【双轨制动画引擎】彻底切割开 PC 与移动的转场特效
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
@@ -758,7 +821,7 @@
           isVideoEnded = true;
           
           if (window.innerWidth > 768) {
-              // 💻 PC 端：恢复中心点扩散的“钢铁侠”渲染逻辑
+              // 💻 PC 端保持极其炫酷但耗性能的钢铁侠鳞片蔓延
               const finalImagePC = document.getElementById('hero-final-image-pc');
               if (finalImagePC) {
                  finalImagePC.style.WebkitMask = "url(#hex-mask-pc)";
@@ -773,16 +836,17 @@
                          }, p.delay);
                      });
                  }
-                 // 完美保留对齐后的呼吸缩放参数
                  finalImagePC.style.transform = "scale(1.13) translateY(-6.2%)";
               }
           } else {
-              // 📱 移动端沙盒：暂用绝对安全的透明度渐变，不调用任何拖累 GPU 的 SVG
+              // 📱 移动端启用专属的光学溶解遮罩扩展（痛点3核心解法）
               const finalImageMobile = document.getElementById('hero-final-image-mobile');
               if (finalImageMobile) {
-                  finalImageMobile.style.opacity = "1";
-                  // 待定微调的移动端动画
-                  finalImageMobile.style.transform = "scale(1.08) translateY(0%)";
+                  // 直接添加定义好的光学遮罩扩散 Class
+                  finalImageMobile.classList.add('mobile-optical-reveal');
+                  // 给与轻微缓慢放大，1.0 -> 1.05
+                  finalImageMobile.style.transform = "scale(1.05)";
+                  finalImageMobile.style.transition = "transform 10s ease-out";
               }
           }
         });
@@ -1261,7 +1325,7 @@
           const border = mesh.userData.border;
           const matData = mesh.material.userData;
           
-          matData.hoverState.value += (mesh.userData.targetHoverState - matData.hoverState.value) * 0.15;
+          matData.hoverState.value += (matData.targetHoverState !== undefined ? mesh.userData.targetHoverState : 0.0 - matData.hoverState.value) * 0.15;
 
           if (matData.hoverState.value > 0.01) {
               mesh.position.z += (30 - mesh.position.z) * 0.15; 
