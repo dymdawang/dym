@@ -153,13 +153,11 @@
         </a>
       </div>
 
+      <!-- 电脑端：下载按钮已删除，打印按钮升级为青绿色渐变强视觉焦点样式 -->
       <div class="hidden md:flex items-center gap-3">
-        <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          下载 PDF
-        </a>
-        <button onclick="window.print()" class="flex items-center gap-2 justify-center px-4 py-2.5 bg-white/10 text-white border border-white/20 rounded-full text-sm font-bold hover:bg-white/20 active:scale-95 transition-all cursor-pointer">
+        <button onclick="window.print()" class="flex items-center gap-2 justify-center px-5 py-2.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
           <i data-lucide="printer" class="w-4 h-4"></i>
+          打印简历
         </button>
       </div>
 
@@ -168,6 +166,7 @@
       </button>
     </div>
 
+    <!-- 手机端折叠菜单：已清理掉多余的下载按钮 -->
     <div id="mobile-menu" class="md:hidden overflow-hidden bg-[#1a1f3c]/95 backdrop-blur-2xl border-white/10 rounded-b-3xl h-0 opacity-0 border-t-0">
       <div class="flex flex-col p-6 gap-4">
         <a href="#about" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">关于我</a>
@@ -175,13 +174,6 @@
         <a href="#projects" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">实战项目</a>
         <a href="#specialties" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">个人特长</a>
         <a href="#contact" class="mobile-nav-link text-lg font-medium text-gray-300 hover:text-white transition-colors">联系我</a>
-        
-        <div class="mt-4 flex flex-col gap-3">
-          <a href="./董奕铭_简历.pdf" download="董奕铭_简历.pdf" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-[#00f0ff] to-[#00ff9d] text-[#080b1a] rounded-full text-sm font-bold shadow-lg active:scale-95 transition-transform cursor-pointer">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            下载 PDF 简历
-          </a>
-        </div>
       </div>
     </div>
   </nav>
@@ -190,19 +182,13 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 【究极版】底层定格 + 钢铁侠六边形鳞片变身转场 -->
+        <!-- 首屏：底层定格 + 钢铁侠六边形鳞片变身转场（完美对齐 scale(1.10) translateY(-6.2%)） -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
           
-          <!-- 底层视频：锁定 scale(1.05) -->
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
-          <!-- 表层定格图 5.jpg：
-               1. 初始化 opacity: 0 彻底隐藏。
-               2. 极其精准的物理对齐：scale(1.10) 补偿体积差，translateY(-6.2%) 暴力托举对齐。
-               3. 将被注入动态 SVG 六边形遮罩执行扩散效果。 -->
           <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
           
-          <!-- 黑色遮罩层 (z-20) -->
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
 
@@ -239,7 +225,7 @@
       </div>
     </section>
 
-    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
+    <!-- ====== 技能、项目等底层内容保持原样 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -363,16 +349,13 @@
         const mask = document.createElementNS(svgNS, "mask");
         mask.setAttribute("id", "hex-mask");
 
-        // 根据屏幕动态计算六边形尺寸，保证鳞片密集度
         const hexRadius = window.innerWidth < 768 ? 20 : 35; 
         const hexWidth = hexRadius * 2;
         const hexHeight = Math.sqrt(3) * hexRadius;
         
-        // 铺满屏幕
         const cols = Math.ceil(window.screen.width * 1.5 / (hexWidth * 0.75));
         const rows = Math.ceil(window.screen.height * 1.5 / hexHeight);
         
-        // 【核心】定义扩散原点：面部中心 (约 50% 宽, 40% 高)
         const centerX = window.innerWidth * 0.5;
         const centerY = window.innerHeight * 0.4;
 
@@ -391,13 +374,10 @@
                 }
                 hex.setAttribute("points", points.join(" "));
                 hex.setAttribute("fill", "white");
-                hex.style.opacity = "0"; // 初始状态透明隐藏
+                hex.style.opacity = "0"; 
                 
-                // 距离算法：决定每个鳞片的点亮延迟
                 const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
                 const maxDist = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
-                
-                // 1200ms 内向外极速扩散，外加极少量的乱序抖动提升科技感
                 const delay = (dist / maxDist) * 1200 + (Math.random() * 150); 
                 
                 hexGroup.appendChild(hex);
@@ -410,7 +390,6 @@
         document.body.appendChild(svg);
     }
     
-    // 页面加载完毕立刻生成底层的遮罩网格待命
     document.addEventListener("DOMContentLoaded", initHexMask);
   </script>
 
@@ -771,12 +750,10 @@
           
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
-             // 1. 瞬间将图片实体的不透明度拉满，但是它被六边形遮罩盖住了，所以还看不见
              finalImage.style.WebkitMask = "url(#hex-mask)";
              finalImage.style.mask = "url(#hex-mask)";
              finalImage.style.opacity = "1";
              
-             // 2. 引爆 SVG 动态鳞片蔓延效果
              if (window.hexPolygons) {
                  window.hexPolygons.forEach(p => {
                      setTimeout(() => {
@@ -786,7 +763,6 @@
                  });
              }
              
-             // 3. 同步开启 10 秒长效呼吸放大，起始已精准对齐至 1.10 与 -6.2%
              finalImage.style.transform = "scale(1.13) translateY(-6.2%)";
           }
         });
@@ -804,7 +780,6 @@
         targetX += (mouseX - targetX) * 0.05; 
         targetY += (mouseY - targetY) * 0.05;
 
-        // 【极简视差】：只针对装载视频和照片的父容器
         if (heroVideoLayer && isVideoEnded) {
             const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
             videoWeight += (1 - videoWeight) * 0.03; 
