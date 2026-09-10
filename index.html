@@ -190,15 +190,16 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 极致纯净：还原为最基础的嵌套逻辑，抛弃所有强制形变补丁 -->
-        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500 bg-[#080b1a]">
+        <!-- 底层定格视频 + 表层渐显覆写的完美转场方案 -->
+        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
           
-          <!-- 完美裁切后的 5.jpg，直接保持 scale(1.05) 防弹跳 -->
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05); object-position: center;">
+          <!-- 底层：原版视频 (z-0)。播放完毕后死锁不动，作为底层绝对参考图 -->
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
+
+          <!-- 表层：完美裁切的高清图 5.jpg (z-10)。初始透明度为 0，添加向上 1.5% 的位移补偿对齐下巴 -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 pointer-events-none" style="transform: scale(1.05) translateY(-1.5%); transition: opacity 1.5s ease-in-out, transform 10s ease-out; object-position: center;">
           
-          <!-- 原版视频，1.5秒丝滑淡出过渡 -->
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10" style="transform: scale(1.05); transition: opacity 1.5s ease-in-out;"></video>
-          
+          <!-- 黑色遮罩层 (z-20) 保持原有氛围 -->
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
 
@@ -692,22 +693,20 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互交接点】：视频播放完毕，触发1.5秒丝滑变幻
+      // 【核心交互交接点】：视频播放完毕，触发底层定格与表层渐显
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
         sciFiVideo.addEventListener('ended', () => {
           isVideoEnded = true;
           
-          // 视频开始 1.5 秒的渐隐淡出，露出底部的 5.jpg
-          sciFiVideo.style.opacity = 0; 
-          
-          // 给 5.jpg 加入极缓慢的 10 秒“呼吸放大”效果
+          // 表层的 5.jpg 开始渐渐浮现，并触发呼吸放大
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
-             finalImage.style.transition = "transform 10s ease-out";
-             // 从基础的 scale(1.05) 缓慢放大到 1.08，保留纯净的呼吸感
-             finalImage.style.transform = "scale(1.08)";
+             // 透明度在 1.5 秒内拉满，完美覆盖底层视频
+             finalImage.style.opacity = 1; 
+             // 保持 Y 轴托举补偿，同时缓慢放大到 1.08，营造 10 秒的呼吸感
+             finalImage.style.transform = "scale(1.08) translateY(-1.5%)";
           }
         });
       }
