@@ -98,16 +98,15 @@
     .reveal-delay-1 { transition-delay: 0.15s; }
 
     /* =========================================
-       📱 移动端专属沙盒 CSS（绝对隔离，不干扰 PC）
+       📱 移动端专属沙盒 CSS
        ========================================= */
     @media (max-width: 768px) {
-        /* 1. 还原视频与图片的真实全景比例，不再放大溢出 */
+        /* 保留 1.0 的全景比例 */
         #sci-fi-video, #hero-final-image-mobile { 
             transform: scale(1) translateY(0) !important; 
             object-position: 50% 40% !important; 
         }
         
-        /* 2. 纯物理锁定向下滚动提示词居中，去除所有干涉偏移的 transform */
         .mobile-scroll-hint {
             left: 0 !important;
             right: 0 !important;
@@ -118,7 +117,7 @@
         }
     }
 
-    /* 移动端专属：原生中心放射扩散 + 光学溶解 */
+    /* 移动端专属：光学溶解（动画时长已放慢至 2 秒，沉浸感拉满） */
     @keyframes mobileMaskExpand {
         0% { -webkit-mask-size: 0% 0%; mask-size: 0% 0%; }
         100% { -webkit-mask-size: 350% 350%; mask-size: 350% 350%; }
@@ -136,8 +135,8 @@
         mask-position: 50% 40%;
         -webkit-mask-repeat: no-repeat;
         mask-repeat: no-repeat;
-        animation: mobileMaskExpand 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
-                   mobileOpticalFade 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        animation: mobileMaskExpand 2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
+                   mobileOpticalFade 2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
     }
   </style>
 </head>
@@ -227,10 +226,8 @@
           
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline webkit-playsinline="true" preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
-          <!-- 💻 PC 端专属：坚守规模化钢铁侠网格展开，坐标定位 1.10 与 -6.2% 物理隔离 -->
           <img id="hero-final-image-pc" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 hidden md:block" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
           
-          <!-- 📱 移动端专属：使用原生 CSS 光晕扩散溶解，由 CSS 强行约束 scale 与 position 物理隔离 -->
           <img id="hero-final-image-mobile" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 md:hidden block" style="transition: transform 10s ease-out;">
 
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
@@ -262,15 +259,12 @@
           </div>
         </div>
 
-        <!-- ⚠️ 移动端纯粹物理居中修补：只靠 flex 定位，通过移动端专属 CSS 覆盖干涉变量 -->
         <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none mobile-scroll-hint">
           <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2 whitespace-nowrap">向下滚动</span>
           <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5"></i>
         </div>
       </div>
     </section>
-
-    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -379,7 +373,6 @@
     </div>
   </footer>
 
-  <!-- 💻 PC 端专属：绝对回滚！原汁原味原生 CSS Mask 钢铁侠引擎 -->
   <script>
     window.hexPolygonsPC = [];
     
@@ -449,7 +442,6 @@
     });
   </script>
 
-  <!-- 📱 移动端沙盒横屏黑边修复：只监听，不动大局高度 -->
   <script>
     window.addEventListener('orientationchange', () => {
         const videoLayer = document.getElementById('hero-video-layer');
@@ -497,7 +489,7 @@
         
         $(window).trigger('scroll');
 
-        // 📱 移动端专属水波纹拖尾引擎（PC端 mousemove 完全无影响）
+        // 🎯 修复 1：严格的双端水波纹节流阀隔离
         $(document).on('mousemove touchmove touchstart', function(e) {
           if (!isReady) return; 
           
@@ -506,10 +498,14 @@
           }
 
           const now = Date.now();
-          if (now - lastDropTime > 40) {
+          let isTouch = e.type.includes('touch');
+          
+          // PC 端绝对还原 120ms 的优雅频率，移动端保持 40ms 高频跟手
+          let delayThreshold = isTouch ? 40 : 120;
+
+          if (now - lastDropTime > delayThreshold) {
             lastDropTime = now;
             let clientX, clientY;
-            let isTouch = e.type.includes('touch');
 
             if (isTouch) {
               if (e.originalEvent.touches && e.originalEvent.touches.length > 0) {
@@ -830,7 +826,6 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【双端隔离核心触发】：确保 PC 与移动转场逻辑 100% 互不干扰
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
@@ -838,7 +833,6 @@
           isVideoEnded = true;
           
           if (window.innerWidth > 768) {
-              // 💻 PC 端：还原完美版六边形鳞片渲染
               const finalImagePC = document.getElementById('hero-final-image-pc');
               if (finalImagePC) {
                  finalImagePC.style.WebkitMask = "url(#hex-mask-pc)";
@@ -856,7 +850,6 @@
                  finalImagePC.style.transform = "scale(1.13) translateY(-6.2%)";
               }
           } else {
-              // 📱 移动端沙盒：赋予专属 CSS 光学溶解类
               const finalImageMobile = document.getElementById('hero-final-image-mobile');
               if (finalImageMobile) {
                   finalImageMobile.classList.add('mobile-optical-reveal');
@@ -1085,7 +1078,6 @@
     });
   </script>
 
-  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -1106,7 +1098,11 @@
       const container = document.getElementById('cert-canvas-container');
       certScene = new THREE.Scene();
       
-      certScene.fog = new THREE.FogExp2(0x04060e, 0.0004); 
+      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
+      let isPortrait = window.innerHeight > window.innerWidth;
+      
+      // 🎯 修复 2：移动端竖屏降低黑雾浓度，不再黑乎乎
+      certScene.fog = new THREE.FogExp2(0x04060e, (isMobileDevice && isPortrait) ? 0.00015 : 0.0004); 
       
       const getCameraZ = () => (window.innerWidth / window.innerHeight < 1.2 ? 1850 * (1.2 / (window.innerWidth / window.innerHeight)) : 1850);
       certCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
@@ -1117,11 +1113,16 @@
       certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(certRenderer.domElement);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
+      // 🎯 修复 2：移动端竖屏提升环境与主光源亮度
+      const ambientIntensity = (isMobileDevice && isPortrait) ? 0.9 : 0.6;
+      const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity); 
       certScene.add(ambientLight);
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
+      
+      const dirIntensity = (isMobileDevice && isPortrait) ? 0.6 : 0.4;
+      const dirLight = new THREE.DirectionalLight(0xffffff, dirIntensity);
       dirLight.position.set(0, 0, 1);
       certCamera.add(dirLight);
+      
       certScene.add(certCamera);
 
       document.getElementById('cert-loading').style.opacity = '0';
@@ -1251,8 +1252,6 @@
             }
         });
       });
-
-      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
       
       const onDown = e => { 
         isCertDragging = true; 
@@ -1265,7 +1264,9 @@
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
         if(isCertDragging){ 
-          certTargetVelocityY = (clientX - certPreviousX) * 0.0008; 
+          // 🎯 修复 2：移动端增强划动灵敏度，手指一拨就转
+          let sensitivity = isMobileDevice ? 0.0015 : 0.0008;
+          certTargetVelocityY = (clientX - certPreviousX) * sensitivity; 
           certPreviousX = clientX; 
         } 
         
@@ -1302,12 +1303,16 @@
     function animateCert3D() {
       certAnimationId = requestAnimationFrame(animateCert3D);
       const t = Date.now() * 0.001;
+      
+      let isPortrait = window.innerHeight > window.innerWidth;
+      // 🎯 修复 2：移动端竖屏赋予强大的保底自转速度
+      let baseVelocity = (isMobileDevice && isPortrait) ? 0.0015 : 0.0005;
 
       if (isCertDragging) {
         certVelocityY = certTargetVelocityY;
       } else {
         certVelocityY *= 0.94; 
-        if (Math.abs(certVelocityY) < 0.0005) certVelocityY = certVelocityY > 0 ? 0.0005 : -0.0005;
+        if (Math.abs(certVelocityY) < baseVelocity) certVelocityY = certVelocityY > 0 ? baseVelocity : -baseVelocity;
       }
       
       mainCarousel.rotation.y += certVelocityY; 
