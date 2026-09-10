@@ -190,13 +190,10 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 【已替换】初始的 2D 视频层与定格图片层 -->
-        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500">
+        <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500 bg-[#080b1a]">
           
-          <!-- 垫在底部的定格图：5.jpg (初始透明且被视频遮挡，调整了 scale 和偏移) -->
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.12) translate(-1%, 2%); object-position: center;">
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(0.7) translateY(-3%); object-position: center; -webkit-mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%); mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);">
           
-          <!-- 原版视频 (增加了 1.5秒的丝滑淡出过渡 transition: opacity 1.5s) -->
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10" style="transform: scale(1.05); transition: opacity 1.5s ease-in-out;"></video>
           
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
@@ -234,8 +231,6 @@
         </div>
       </div>
     </section>
-
-    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -702,12 +697,12 @@
           // 视频开始 1.5 秒的渐隐淡出，露出底部的 5.jpg
           sciFiVideo.style.opacity = 0; 
           
-          // 【点睛之笔】：给 5.jpg 加入极缓慢的 10 秒“呼吸放大”效果，让画面拥有生命力
+          // 给 5.jpg 加入极缓慢的 10 秒“呼吸放大”效果
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
              finalImage.style.transition = "transform 10s ease-out";
-             // 相比初始的 scale(1.12)，缓慢放大到 1.15
-             finalImage.style.transform = "scale(1.15) translate(-1%, 2%)";
+             // 相比初始的 scale(0.7)，极其缓慢地呼吸放大到 0.73，匹配定格时的从容感
+             finalImage.style.transform = "scale(0.73) translateY(-3%)";
           }
         });
       }
@@ -724,7 +719,7 @@
         targetX += (mouseX - targetX) * 0.05; 
         targetY += (mouseY - targetY) * 0.05;
 
-        // 【极简视差】：只针对装载视频和照片的父容器，不再缩放，完美防止弹跳
+        // 【极简视差】：只针对装载视频和照片的父容器
         if (heroVideoLayer && isVideoEnded) {
             const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
             videoWeight += (1 - videoWeight) * 0.03; 
@@ -742,8 +737,6 @@
 
           if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
           if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
-          
-          // 原本 heroTextInitial 和 heroTextFinal 的跟随视差已彻底移除，让文字死锁固定
           
           if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
         }
@@ -833,7 +826,6 @@
           const text2Progress = Math.max(0, (scrollY - window.innerHeight * 0.4) / (window.innerHeight * 0.6));
           const finalProgress = Math.min(text2Progress, 1);
           heroTextFinal.style.opacity = finalProgress;
-          // 仅保留由滚动带来的进场升起动画，不再跟随鼠标乱晃
           heroTextFinal.style.transform = `scale(${0.9 + finalProgress * 0.1}) translateY(${-20 + finalProgress * 20}px)`;
         }
       }
@@ -936,7 +928,6 @@
     });
   </script>
 
-  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
