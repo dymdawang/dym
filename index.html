@@ -15,7 +15,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
     
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       font-family: 'Outfit', sans-serif;
@@ -24,6 +24,7 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
+      width: 100%;
     }
 
     .halo-shield {
@@ -97,21 +98,14 @@
     .reveal.active { opacity: 1; transform: translateY(0); }
     .reveal-delay-1 { transition-delay: 0.15s; }
 
-    /* 📱 移动端专属沙盒 CSS：彻底接管手机渲染 */
+    /* 📱 移动端沙盒独享：还原视频无缩放的真实比例，以及光学溶解扩散动画 */
     @media (max-width: 768px) {
-        /* 强制还原原始大小，找回竖屏全景，避免“显大” */
         #sci-fi-video { 
             transform: scale(1) !important; 
             object-position: 50% 40% !important; 
         }
-        #hero-video-layer {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh; /* 横竖屏完美自适应高度，消灭黑边 */
-        }
     }
 
-    /* 移动端专属：电影级光学溶解 + 原生中心放射遮罩（绝对流畅） */
     @keyframes mobileMaskExpand {
         0% { -webkit-mask-size: 0% 0%; mask-size: 0% 0%; }
         100% { -webkit-mask-size: 350% 350%; mask-size: 350% 350%; }
@@ -120,16 +114,15 @@
         0% { filter: blur(12px) brightness(1.4); }
         100% { filter: blur(0px) brightness(1); }
     }
+    
     .mobile-optical-reveal {
         opacity: 1 !important;
-        /* 原生光晕圆环：精准对齐面部中心（50% 40%） */
         -webkit-mask-image: radial-gradient(circle, black 50%, transparent 55%);
         mask-image: radial-gradient(circle, black 50%, transparent 55%);
         -webkit-mask-position: 50% 40%;
         mask-position: 50% 40%;
         -webkit-mask-repeat: no-repeat;
         mask-repeat: no-repeat;
-        /* 并行引爆双特效 */
         animation: mobileMaskExpand 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
                    mobileOpticalFade 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
     }
@@ -217,7 +210,7 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <div id="hero-video-layer" class="absolute inset-0 origin-center flex items-center justify-center bg-[#080b1a] w-full h-full">
+        <div id="hero-video-layer" class="absolute inset-0 origin-center flex items-center justify-center bg-[#080b1a] w-full h-full overflow-hidden">
           
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline webkit-playsinline="true" preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
@@ -254,9 +247,9 @@
           </div>
         </div>
 
-        <div class="absolute bottom-10 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none w-full text-center" style="left: 50%; transform: translateX(-50%);">
-          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2 whitespace-nowrap">向下滚动</span>
-          <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5 mx-auto"></i>
+        <div class="absolute bottom-6 md:bottom-10 left-0 right-0 w-full flex flex-col items-center justify-center z-50 text-white/50 animate-bounce pointer-events-none">
+          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2">向下滚动</span>
+          <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5"></i>
         </div>
       </div>
     </section>
@@ -439,11 +432,18 @@
 
   <script>
     window.addEventListener('orientationchange', () => {
+        const videoLayer = document.getElementById('hero-video-layer');
+        if (videoLayer) {
+            // 通过极短的隐藏-显示周期，强制触发手机底层的 DOM Reflow 重绘以吃满横屏宽度
+            videoLayer.style.display = 'none';
+            videoLayer.offsetHeight; 
+            videoLayer.style.display = 'flex';
+        }
         setTimeout(() => {
             if (window.innerWidth <= 768 || window.innerHeight <= 768) {
                 try { $('#water-canvas-layer').ripples('updateSize'); } catch(e){}
             }
-        }, 200);
+        }, 300);
     });
   </script>
 
@@ -478,7 +478,7 @@
         
         $(window).trigger('scroll');
 
-        // 修复点 3：移动端专属水波纹拖尾（touchstart & touchmove 并行拦截）
+        // 📱 移动端专属水波纹拖尾引擎（PC端 mousemove 不受影响）
         $(document).on('mousemove touchmove touchstart', function(e) {
           if (!isReady) return; 
           
@@ -487,7 +487,6 @@
           }
 
           const now = Date.now();
-          // 加快响应频率以贴合手指滑动
           if (now - lastDropTime > 40) {
             lastDropTime = now;
             let clientX, clientY;
@@ -506,7 +505,6 @@
             }
 
             try {
-              // 移动端手指触碰：波纹更大、涟漪更强，绝不被忽略！
               $waterLayer.ripples('drop', clientX, clientY, isTouch ? 25 : 15, isTouch ? 0.05 : 0.02);
             } catch (err) {}
           }
@@ -813,7 +811,7 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【双轨制动画引擎】彻底切割开 PC 与移动的转场特效
+      // 【双端 100% 物理隔离引爆点】
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
@@ -821,7 +819,7 @@
           isVideoEnded = true;
           
           if (window.innerWidth > 768) {
-              // 💻 PC 端保持极其炫酷但耗性能的钢铁侠鳞片蔓延
+              // 💻 PC 端：最纯粹、零妥协的钢铁侠扩展遮罩
               const finalImagePC = document.getElementById('hero-final-image-pc');
               if (finalImagePC) {
                  finalImagePC.style.WebkitMask = "url(#hex-mask-pc)";
@@ -839,12 +837,10 @@
                  finalImagePC.style.transform = "scale(1.13) translateY(-6.2%)";
               }
           } else {
-              // 📱 移动端启用专属的光学溶解遮罩扩展（痛点3核心解法）
+              // 📱 移动端沙盒：光学溶解+径向扩散
               const finalImageMobile = document.getElementById('hero-final-image-mobile');
               if (finalImageMobile) {
-                  // 直接添加定义好的光学遮罩扩散 Class
                   finalImageMobile.classList.add('mobile-optical-reveal');
-                  // 给与轻微缓慢放大，1.0 -> 1.05
                   finalImageMobile.style.transform = "scale(1.05)";
                   finalImageMobile.style.transition = "transform 10s ease-out";
               }
