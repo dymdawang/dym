@@ -190,10 +190,13 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
+        <!-- 极致纯净：还原为最基础的嵌套逻辑，抛弃所有强制形变补丁 -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500 bg-[#080b1a]">
           
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(0.7) translateY(-3%); object-position: center; -webkit-mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%); mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);">
+          <!-- 完美裁切后的 5.jpg，直接保持 scale(1.05) 防弹跳 -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05); object-position: center;">
           
+          <!-- 原版视频，1.5秒丝滑淡出过渡 -->
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10" style="transform: scale(1.05); transition: opacity 1.5s ease-in-out;"></video>
           
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
@@ -231,6 +234,8 @@
         </div>
       </div>
     </section>
+
+    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -701,8 +706,8 @@
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
              finalImage.style.transition = "transform 10s ease-out";
-             // 相比初始的 scale(0.7)，极其缓慢地呼吸放大到 0.73，匹配定格时的从容感
-             finalImage.style.transform = "scale(0.73) translateY(-3%)";
+             // 从基础的 scale(1.05) 缓慢放大到 1.08，保留纯净的呼吸感
+             finalImage.style.transform = "scale(1.08)";
           }
         });
       }
@@ -928,6 +933,7 @@
     });
   </script>
 
+  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
