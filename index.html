@@ -101,7 +101,6 @@
        📱 移动端专属沙盒 CSS
        ========================================= */
     @media (max-width: 768px) {
-        /* 保留 1.0 的全景比例 */
         #sci-fi-video, #hero-final-image-mobile { 
             transform: scale(1) translateY(0) !important; 
             object-position: 50% 40% !important; 
@@ -117,7 +116,7 @@
         }
     }
 
-    /* 移动端专属：光学溶解（动画时长已放慢至 2 秒，沉浸感拉满） */
+    /* 移动端专属：光学溶解（已回滚至 1.2s） */
     @keyframes mobileMaskExpand {
         0% { -webkit-mask-size: 0% 0%; mask-size: 0% 0%; }
         100% { -webkit-mask-size: 350% 350%; mask-size: 350% 350%; }
@@ -135,8 +134,8 @@
         mask-position: 50% 40%;
         -webkit-mask-repeat: no-repeat;
         mask-repeat: no-repeat;
-        animation: mobileMaskExpand 2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
-                   mobileOpticalFade 2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        animation: mobileMaskExpand 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards,
+                   mobileOpticalFade 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
     }
   </style>
 </head>
@@ -489,7 +488,7 @@
         
         $(window).trigger('scroll');
 
-        // 🎯 修复 1：严格的双端水波纹节流阀隔离
+        // 🎯 您确认保留的：严格的双端水波纹节流阀物理隔离
         $(document).on('mousemove touchmove touchstart', function(e) {
           if (!isReady) return; 
           
@@ -1078,6 +1077,7 @@
     });
   </script>
 
+  <!-- 3D 证书展厅（已撤销所有移动端修改，完全还原） -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -1098,11 +1098,7 @@
       const container = document.getElementById('cert-canvas-container');
       certScene = new THREE.Scene();
       
-      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
-      let isPortrait = window.innerHeight > window.innerWidth;
-      
-      // 🎯 修复 2：移动端竖屏降低黑雾浓度，不再黑乎乎
-      certScene.fog = new THREE.FogExp2(0x04060e, (isMobileDevice && isPortrait) ? 0.00015 : 0.0004); 
+      certScene.fog = new THREE.FogExp2(0x04060e, 0.0004); 
       
       const getCameraZ = () => (window.innerWidth / window.innerHeight < 1.2 ? 1850 * (1.2 / (window.innerWidth / window.innerHeight)) : 1850);
       certCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
@@ -1113,16 +1109,11 @@
       certRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(certRenderer.domElement);
 
-      // 🎯 修复 2：移动端竖屏提升环境与主光源亮度
-      const ambientIntensity = (isMobileDevice && isPortrait) ? 0.9 : 0.6;
-      const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity); 
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
       certScene.add(ambientLight);
-      
-      const dirIntensity = (isMobileDevice && isPortrait) ? 0.6 : 0.4;
-      const dirLight = new THREE.DirectionalLight(0xffffff, dirIntensity);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.4);
       dirLight.position.set(0, 0, 1);
       certCamera.add(dirLight);
-      
       certScene.add(certCamera);
 
       document.getElementById('cert-loading').style.opacity = '0';
@@ -1252,6 +1243,8 @@
             }
         });
       });
+
+      isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
       
       const onDown = e => { 
         isCertDragging = true; 
@@ -1264,9 +1257,7 @@
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
         if(isCertDragging){ 
-          // 🎯 修复 2：移动端增强划动灵敏度，手指一拨就转
-          let sensitivity = isMobileDevice ? 0.0015 : 0.0008;
-          certTargetVelocityY = (clientX - certPreviousX) * sensitivity; 
+          certTargetVelocityY = (clientX - certPreviousX) * 0.0008; 
           certPreviousX = clientX; 
         } 
         
@@ -1303,16 +1294,12 @@
     function animateCert3D() {
       certAnimationId = requestAnimationFrame(animateCert3D);
       const t = Date.now() * 0.001;
-      
-      let isPortrait = window.innerHeight > window.innerWidth;
-      // 🎯 修复 2：移动端竖屏赋予强大的保底自转速度
-      let baseVelocity = (isMobileDevice && isPortrait) ? 0.0015 : 0.0005;
 
       if (isCertDragging) {
         certVelocityY = certTargetVelocityY;
       } else {
         certVelocityY *= 0.94; 
-        if (Math.abs(certVelocityY) < baseVelocity) certVelocityY = certVelocityY > 0 ? baseVelocity : -baseVelocity;
+        if (Math.abs(certVelocityY) < 0.0005) certVelocityY = certVelocityY > 0 ? 0.0005 : -0.0005;
       }
       
       mainCarousel.rotation.y += certVelocityY; 
