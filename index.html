@@ -193,11 +193,11 @@
         <!-- 【已替换】初始的 2D 视频层与定格图片层 -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500">
           
-          <!-- 垫在底部的定格图：5.jpg (初始存在但在视频下方，死锁 1.05 大小) -->
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05); object-position: 50% 50%;">
+          <!-- 垫在底部的定格图：5.jpg (初始透明且被视频遮挡，调整了 scale 和偏移) -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.12) translate(-1%, 2%); object-position: center;">
           
-          <!-- 原版视频 (层级在图片之上，死锁 1.05 大小彻底防弹跳) -->
-          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-500" style="transform: scale(1.05);"></video>
+          <!-- 原版视频 (增加了 1.5秒的丝滑淡出过渡 transition: opacity 1.5s) -->
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10" style="transform: scale(1.05); transition: opacity 1.5s ease-in-out;"></video>
           
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
@@ -692,13 +692,23 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互交接点】：视频播放完毕，透明度归零，完美露出底部的 5.jpg
+      // 【核心交互交接点】：视频播放完毕，触发1.5秒丝滑变幻
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
         sciFiVideo.addEventListener('ended', () => {
           isVideoEnded = true;
+          
+          // 视频开始 1.5 秒的渐隐淡出，露出底部的 5.jpg
           sciFiVideo.style.opacity = 0; 
+          
+          // 【点睛之笔】：给 5.jpg 加入极缓慢的 10 秒“呼吸放大”效果，让画面拥有生命力
+          const finalImage = document.getElementById('hero-final-image');
+          if (finalImage) {
+             finalImage.style.transition = "transform 10s ease-out";
+             // 相比初始的 scale(1.12)，缓慢放大到 1.15
+             finalImage.style.transform = "scale(1.15) translate(-1%, 2%)";
+          }
         });
       }
 
