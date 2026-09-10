@@ -190,16 +190,19 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 【核心重构】底层定格视频 + 表层0.8秒极速显现覆盖方案 -->
+        <!-- 【极致精度对齐】底层死锁定格 + 表层0.8秒显现覆盖方案 -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
           
-          <!-- 底层：原版视频 (z-0)。播放完毕后死锁不动，作为底层绝对参考图 -->
+          <!-- 底层视频：锁定 scale(1.05) -->
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
-          <!-- 表层：完美裁切的高清图 5.jpg (z-10)。透明度0.8秒极速渐变，并添加向上 2.5% 的位移补偿精准对齐 -->
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 pointer-events-none" style="transform: scale(1.05) translateY(-2.5%); transition: opacity 0.8s ease-in-out, transform 10s ease-out; object-position: center;">
+          <!-- 表层定格图 5.jpg：
+               1. 使用 scale(1.085) 精准补偿图片视界差导致的“变小”。
+               2. 使用 translateY(-4.5%) 精准补偿重心的“下坠”。
+               3. 维持 0.8s 干脆显现过渡。 -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 pointer-events-none" style="transform: scale(1.085) translateY(-4.5%); transition: opacity 0.8s ease-in-out, transform 10s ease-out; object-position: center;">
           
-          <!-- 黑色遮罩层 (z-20) 保持原有氛围 -->
+          <!-- 黑色遮罩层 (z-20) -->
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
 
@@ -700,12 +703,12 @@
         sciFiVideo.addEventListener('ended', () => {
           isVideoEnded = true;
           
-          // 表层的 5.jpg 在0.8秒内极速浮现，并触发呼吸放大
+          // 表层的 5.jpg 在0.8秒内极速浮现，并触发同步补偿的呼吸放大
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
              finalImage.style.opacity = 1; 
-             // 保持 Y 轴向上 2.5% 的托举补偿，缓慢呼吸放大至 1.08
-             finalImage.style.transform = "scale(1.08) translateY(-2.5%)";
+             // 终端呼吸感：放大至 1.11，完美维系 -4.5% 的物理补偿落差
+             finalImage.style.transform = "scale(1.11) translateY(-4.5%)";
           }
         });
       }
