@@ -15,7 +15,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
     
-    html { scroll-behavior: smooth; overflow-x: hidden; }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'Outfit', sans-serif;
@@ -24,7 +24,6 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
-      width: 100%;
     }
 
     .halo-shield {
@@ -98,14 +97,28 @@
     .reveal.active { opacity: 1; transform: translateY(0); }
     .reveal-delay-1 { transition-delay: 0.15s; }
 
-    /* 📱 移动端沙盒独享：还原视频无缩放的真实比例，以及光学溶解扩散动画 */
+    /* =========================================
+       📱 移动端专属沙盒 CSS（绝对隔离，不干扰 PC）
+       ========================================= */
     @media (max-width: 768px) {
-        #sci-fi-video { 
-            transform: scale(1) !important; 
+        /* 1. 还原视频与图片的真实全景比例，不再放大溢出 */
+        #sci-fi-video, #hero-final-image-mobile { 
+            transform: scale(1) translateY(0) !important; 
             object-position: 50% 40% !important; 
+        }
+        
+        /* 2. 纯物理锁定向下滚动提示词居中，去除所有干涉偏移的 transform */
+        .mobile-scroll-hint {
+            left: 0 !important;
+            right: 0 !important;
+            margin: auto !important;
+            transform: none !important;
+            width: 100% !important;
+            text-align: center !important;
         }
     }
 
+    /* 移动端专属：原生中心放射扩散 + 光学溶解 */
     @keyframes mobileMaskExpand {
         0% { -webkit-mask-size: 0% 0%; mask-size: 0% 0%; }
         100% { -webkit-mask-size: 350% 350%; mask-size: 350% 350%; }
@@ -214,9 +227,11 @@
           
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline webkit-playsinline="true" preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
+          <!-- 💻 PC 端专属：坚守规模化钢铁侠网格展开，坐标定位 1.10 与 -6.2% 物理隔离 -->
           <img id="hero-final-image-pc" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 hidden md:block" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
           
-          <img id="hero-final-image-mobile" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 md:hidden block" style="transform: scale(1); object-position: 50% 40%;">
+          <!-- 📱 移动端专属：使用原生 CSS 光晕扩散溶解，由 CSS 强行约束 scale 与 position 物理隔离 -->
+          <img id="hero-final-image-mobile" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0 md:hidden block" style="transition: transform 10s ease-out;">
 
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
@@ -247,12 +262,15 @@
           </div>
         </div>
 
-        <div class="absolute bottom-6 md:bottom-10 left-0 right-0 w-full flex flex-col items-center justify-center z-50 text-white/50 animate-bounce pointer-events-none">
-          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2">向下滚动</span>
+        <!-- ⚠️ 移动端纯粹物理居中修补：只靠 flex 定位，通过移动端专属 CSS 覆盖干涉变量 -->
+        <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-50 text-white/50 flex flex-col items-center animate-bounce pointer-events-none mobile-scroll-hint">
+          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest mb-1 md:mb-2 whitespace-nowrap">向下滚动</span>
           <i data-lucide="arrow-down" class="w-4 h-4 md:w-5 md:h-5"></i>
         </div>
       </div>
     </section>
+
+    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -361,6 +379,7 @@
     </div>
   </footer>
 
+  <!-- 💻 PC 端专属：绝对回滚！原汁原味原生 CSS Mask 钢铁侠引擎 -->
   <script>
     window.hexPolygonsPC = [];
     
@@ -430,11 +449,11 @@
     });
   </script>
 
+  <!-- 📱 移动端沙盒横屏黑边修复：只监听，不动大局高度 -->
   <script>
     window.addEventListener('orientationchange', () => {
         const videoLayer = document.getElementById('hero-video-layer');
-        if (videoLayer) {
-            // 通过极短的隐藏-显示周期，强制触发手机底层的 DOM Reflow 重绘以吃满横屏宽度
+        if (videoLayer && window.innerWidth <= 768) {
             videoLayer.style.display = 'none';
             videoLayer.offsetHeight; 
             videoLayer.style.display = 'flex';
@@ -478,7 +497,7 @@
         
         $(window).trigger('scroll');
 
-        // 📱 移动端专属水波纹拖尾引擎（PC端 mousemove 不受影响）
+        // 📱 移动端专属水波纹拖尾引擎（PC端 mousemove 完全无影响）
         $(document).on('mousemove touchmove touchstart', function(e) {
           if (!isReady) return; 
           
@@ -811,7 +830,7 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【双端 100% 物理隔离引爆点】
+      // 【双端隔离核心触发】：确保 PC 与移动转场逻辑 100% 互不干扰
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
@@ -819,7 +838,7 @@
           isVideoEnded = true;
           
           if (window.innerWidth > 768) {
-              // 💻 PC 端：最纯粹、零妥协的钢铁侠扩展遮罩
+              // 💻 PC 端：还原完美版六边形鳞片渲染
               const finalImagePC = document.getElementById('hero-final-image-pc');
               if (finalImagePC) {
                  finalImagePC.style.WebkitMask = "url(#hex-mask-pc)";
@@ -837,12 +856,10 @@
                  finalImagePC.style.transform = "scale(1.13) translateY(-6.2%)";
               }
           } else {
-              // 📱 移动端沙盒：光学溶解+径向扩散
+              // 📱 移动端沙盒：赋予专属 CSS 光学溶解类
               const finalImageMobile = document.getElementById('hero-final-image-mobile');
               if (finalImageMobile) {
                   finalImageMobile.classList.add('mobile-optical-reveal');
-                  finalImageMobile.style.transform = "scale(1.05)";
-                  finalImageMobile.style.transition = "transform 10s ease-out";
               }
           }
         });
@@ -1068,6 +1085,7 @@
     });
   </script>
 
+  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
