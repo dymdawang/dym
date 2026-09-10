@@ -190,12 +190,17 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
+        <!-- 【已替换】初始的 2D 视频层与定格图片层 -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center opacity-0 flex items-center justify-center transition-opacity duration-500">
-          <video id="sci-fi-video" crossorigin="anonymous" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="w-full h-full object-cover"></video>
-          <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
+          
+          <!-- 垫在底部的定格图：5.jpg (初始存在但在视频下方，死锁 1.05 大小) -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05); object-position: 50% 50%;">
+          
+          <!-- 原版视频 (层级在图片之上，死锁 1.05 大小彻底防弹跳) -->
+          <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-500" style="transform: scale(1.05);"></video>
+          
+          <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
         </div>
-
-        <div id="hero-3d-canvas-container" class="absolute inset-0 w-full h-full z-20 pointer-events-none opacity-0 transition-opacity duration-1000"></div>
 
         <div id="forest-wrapper" class="absolute inset-0 w-full h-full">
           <img id="forest-bg" src="https://strvid.nyc3.cdn.digitaloceanspaces.com/motionsite/hero_forest_img_1.png" class="absolute inset-0 w-full h-full object-cover hero-img-load" style="animation-delay: 0.1s;" />
@@ -215,7 +220,7 @@
           <h2 class="text-base sm:text-xl md:text-[2.5vw] font-medium text-gray-300 md:text-white tracking-wide">
             重庆邮电大学 · 通信工程本科
           </h2>
-          <div class="inline-flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 mt-2 md:mt-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md transform hover:scale-105 transition-transform duration-300">
+          <div class="inline-flex items-center gap-2.5 px-4 md:px-5 py-2 md:py-2.5 mt-2 md:mt-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.1)]">
             <span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-[#00f0ff] animate-pulse shrink-0"></span>
             <span class="text-xs sm:text-sm md:text-lg font-bold tracking-widest text-gray-200 leading-none mt-0.5">
               <span class="text-gray-400 mr-1 md:mr-2">求职方向：</span>研发 / AIGC / 管培生
@@ -229,6 +234,8 @@
         </div>
       </div>
     </section>
+
+    <!-- ====== 技能、项目等底层内容绝对保持不变 ====== -->
 
     <section class="py-12 md:py-16 border-y border-white/5 bg-transparent overflow-hidden relative cursor-pointer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 md:mb-8 flex flex-col items-center">
@@ -339,7 +346,6 @@
 
   <script>
     let isForestPermanentlyHidden = false; 
-    let isHeroRingExpanding = false;       
 
     $(document).ready(function() {
       try {
@@ -371,9 +377,11 @@
 
         $(document).on('mousemove', function(e) {
           if (!isReady) return; 
+          
           if (!isForestPermanentlyHidden && window.scrollY <= window.innerHeight * 0.8) {
               return;
           }
+
           const now = Date.now();
           if (now - lastDropTime > 150) {
             lastDropTime = now;
@@ -382,8 +390,9 @@
             } catch (err) {}
           }
         });
+
       } catch (e) {
-        console.error("Ripples engine failed:", e);
+        console.error("Ripples engine initialization failed:", e);
       }
     });
   </script>
@@ -446,6 +455,7 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
+      
       const cursorDot = document.getElementById('cursor-dot');
       const cursorRing = document.getElementById('cursor-ring');
       
@@ -682,24 +692,13 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互触发：视频结束时无缝对接全息星环】
+      // 【核心交互交接点】：视频播放完毕，透明度归零，完美露出底部的 5.jpg
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
         sciFiVideo.addEventListener('ended', () => {
           isVideoEnded = true;
-          
-          // 原生 2D 视频隐形退出
-          if (heroVideoLayer) {
-             heroVideoLayer.style.opacity = 0;
-          }
-          
-          // 唤醒 3D 引擎，全息头像在此刻无缝接管视觉
-          const container3D = document.getElementById('hero-3d-canvas-container');
-          if (container3D) container3D.style.opacity = 1;
-
-          // 引爆星环
-          isHeroRingExpanding = true;
+          sciFiVideo.style.opacity = 0; 
         });
       }
 
@@ -715,13 +714,13 @@
         targetX += (mouseX - targetX) * 0.05; 
         targetY += (mouseY - targetY) * 0.05;
 
-        if (sciFiVideo && isVideoEnded && !isHeroRingExpanding) {
+        // 【极简视差】：只针对装载视频和照片的父容器，不再缩放，完美防止弹跳
+        if (heroVideoLayer && isVideoEnded) {
             const moveDamp = window.innerWidth < 768 ? 0.3 : 1; 
-            const scaleBg = window.innerWidth < 768 ? 1.02 : 1.05;
             videoWeight += (1 - videoWeight) * 0.03; 
             const curX = targetX * 15 * videoWeight * moveDamp;
             const curY = targetY * 15 * videoWeight * moveDamp;
-            sciFiVideo.style.transform = `translate(${curX}px, ${curY}px) scale(${scaleBg})`;
+            heroVideoLayer.style.transform = `translate(${curX}px, ${curY}px)`;
         }
 
         if (!isForestPermanentlyHidden && window.scrollY < window.innerHeight * 1.5) {
@@ -733,7 +732,9 @@
 
           if(forestBg) forestBg.style.transform = `translate(${targetX * 10 * moveDamp}px, ${targetY * 10 * moveDamp}px) scale(${scaleBg})`;
           if(forestMg) forestMg.style.transform = `translate(${targetX * 25 * moveDamp}px, ${targetY * 25 * moveDamp}px) scale(${scaleMg})`;
-          if(heroTextInitial) heroTextInitial.style.transform = `translate(${targetX * 30 * moveDamp}px, ${targetY * 30 * moveDamp}px)`;
+          
+          // 原本 heroTextInitial 和 heroTextFinal 的跟随视差已彻底移除，让文字死锁固定
+          
           if(forestFg) forestFg.style.transform = `translate(${targetX * 60 * moveDamp}px, ${targetY * 60 * moveDamp}px) scale(${scaleFg})`;
         }
         
@@ -769,7 +770,7 @@
 
         if (isForestPermanentlyHidden) {
           document.body.classList.remove('hero-mode');
-          if (heroVideoLayer && !isHeroRingExpanding) {
+          if (heroVideoLayer) {
              heroVideoLayer.style.opacity = 1;
           }
           if (heroTextFinal) {
@@ -809,7 +810,7 @@
           forestWrapper.style.transform = `scale(${1 + progress * 0.05}) translateY(${progress * 30}px)`;
         }
 
-        if(heroVideoLayer && !isHeroRingExpanding) {
+        if(heroVideoLayer) {
           heroVideoLayer.style.opacity = Math.min(progress * 1.5, 1);
         }
 
@@ -822,6 +823,7 @@
           const text2Progress = Math.max(0, (scrollY - window.innerHeight * 0.4) / (window.innerHeight * 0.6));
           const finalProgress = Math.min(text2Progress, 1);
           heroTextFinal.style.opacity = finalProgress;
+          // 仅保留由滚动带来的进场升起动画，不再跟随鼠标乱晃
           heroTextFinal.style.transform = `scale(${0.9 + finalProgress * 0.1}) translateY(${-20 + finalProgress * 20}px)`;
         }
       }
@@ -924,6 +926,7 @@
     });
   </script>
 
+  <!-- 3D 证书展厅：绝对保持不变 -->
   <script>
     let isCert3DReady = false;
     let certAnimationId = null;
@@ -1216,171 +1219,6 @@
         isCert3DReady = false; 
       }, 500);
     }
-  </script>
-
-  <script>
-    let hero3DScene, hero3DCamera, hero3DRenderer, hero3DGroup, heroRing;
-    let heroRingUniforms;
-    let heroTargetX = 0, heroTargetY = 0;
-
-    window.addEventListener('mousemove', (e) => {
-      heroTargetX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
-      heroTargetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-    });
-
-    function initHero3D() {
-      const container = document.getElementById('hero-3d-canvas-container');
-      if (!container) return;
-
-      hero3DScene = new THREE.Scene();
-      
-      hero3DCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 3000);
-      hero3DCamera.position.z = 1000;
-
-      hero3DRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      hero3DRenderer.setSize(window.innerWidth, window.innerHeight);
-      hero3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(hero3DRenderer.domElement);
-
-      hero3DGroup = new THREE.Group();
-      hero3DScene.add(hero3DGroup);
-
-      // 1. VideoTexture 实时劫持：直接读取 HTML 里的 video 并投射到 3D 空间！
-      const videoElement = document.getElementById('sci-fi-video');
-      const avatarTex = new THREE.VideoTexture(videoElement);
-      avatarTex.minFilter = THREE.LinearFilter;
-      avatarTex.magFilter = THREE.LinearFilter;
-
-      // 智能计算自适应面板大小（完美复现 object-cover）
-      const screenAspect = window.innerWidth / window.innerHeight;
-      const videoAspect = 16 / 9; 
-      let planeWidth, planeHeight;
-      if (screenAspect > videoAspect) {
-          planeWidth = 828 * screenAspect;
-          planeHeight = planeWidth / videoAspect;
-      } else {
-          planeHeight = 828;
-          planeWidth = planeHeight * videoAspect;
-      }
-      const planeGeo = new THREE.PlaneGeometry(planeWidth, planeHeight);
-      
-      // 【黑科技着色】：使用 AdditiveBlending 加色混合，瞬间让纯黑背景消融，只留绿色人头！
-      const planeMat = new THREE.MeshBasicMaterial({ 
-        map: avatarTex, 
-        transparent: true,
-        blending: THREE.AdditiveBlending, 
-        depthWrite: false 
-      });
-      const avatarMesh = new THREE.Mesh(planeGeo, planeMat);
-      hero3DGroup.add(avatarMesh);
-
-      // 2. 重写的超清史诗级液态星环（占据 80%）
-      const ringGeo = new THREE.TorusGeometry(331, 35, 64, 200); 
-      
-      heroRingUniforms = {
-          time: { value: 0 },
-          colorDeep: { value: new THREE.Color(0x063b33) },    // 深海幽绿
-          colorEmerald: { value: new THREE.Color(0x00ff9d) }, // 荧光翠绿
-          colorGlow: { value: new THREE.Color(0xefff66) }     // 边缘微黄高光
-      };
-
-      const ringMat = new THREE.ShaderMaterial({
-          uniforms: heroRingUniforms,
-          vertexShader: `
-              varying vec2 vUv;
-              varying vec3 vNormal;
-              varying vec3 vViewPosition;
-              void main() {
-                  vUv = uv;
-                  vNormal = normalize(normalMatrix * normal);
-                  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                  vViewPosition = -mvPosition.xyz;
-                  gl_Position = projectionMatrix * mvPosition;
-              }
-          `,
-          fragmentShader: `
-              uniform float time;
-              uniform vec3 colorDeep;
-              uniform vec3 colorEmerald;
-              uniform vec3 colorGlow;
-              
-              varying vec2 vUv;
-              varying vec3 vNormal;
-              varying vec3 vViewPosition;
-              
-              void main() {
-                  // 复杂正弦波流体置换
-                  vec2 uv = vUv * vec2(12.0, 3.0);
-                  float wave1 = sin(uv.x + time * 2.0) * cos(uv.y - time * 1.5);
-                  float wave2 = sin(uv.x * 0.8 - time) * cos(uv.y * 2.5 + time * 0.8);
-                  float n = (wave1 + wave2 + 2.0) * 0.25; 
-                  
-                  // 深度混色
-                  vec3 color = mix(colorDeep, colorEmerald, smoothstep(0.2, 0.7, n));
-                  color = mix(color, colorGlow, smoothstep(0.8, 1.0, n));
-                  
-                  // 液态玻璃折射菲涅尔
-                  vec3 normal = normalize(vNormal);
-                  vec3 viewDir = normalize(vViewPosition);
-                  float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.0);
-                  color += colorGlow * fresnel * 0.9;
-                  
-                  // 柔和羽化边缘
-                  float alpha = smoothstep(0.0, 0.4, n) * 0.8 + 0.2;
-                  
-                  gl_FragColor = vec4(color, alpha);
-              }
-          `,
-          transparent: true,
-          blending: THREE.AdditiveBlending, // 加色高光模式
-          depthWrite: false,
-          side: THREE.DoubleSide
-      });
-
-      heroRing = new THREE.Mesh(ringGeo, ringMat);
-      heroRing.scale.set(0.01, 0.01, 0.01);
-      heroRing.rotation.x = Math.PI * 0.4; // 霸气切入
-
-      hero3DGroup.add(heroRing);
-      
-      animateHero3D();
-    }
-
-    let curRotX = 0, curRotY = 0;
-    function animateHero3D() {
-      requestAnimationFrame(animateHero3D);
-      if(heroRingUniforms) heroRingUniforms.time.value += 0.015;
-
-      if (isHeroRingExpanding && heroRing && heroRing.scale.x < 0.999) {
-          heroRing.scale.lerp(new THREE.Vector3(1, 1, 1), 0.035);
-      }
-      
-      if (heroRing) {
-          heroRing.rotation.z += 0.001; 
-      }
-
-      if (hero3DGroup && isHeroRingExpanding) {
-          curRotX += ((heroTargetY * 0.25) - curRotX) * 0.05;
-          curRotY += ((heroTargetX * 0.25) - curRotY) * 0.05;
-          hero3DGroup.rotation.x = curRotX;
-          hero3DGroup.rotation.y = curRotY;
-      }
-
-      if(hero3DRenderer && hero3DScene && hero3DCamera) {
-          hero3DRenderer.render(hero3DScene, hero3DCamera);
-      }
-    }
-
-    window.addEventListener('load', () => {
-      initHero3D();
-    });
-    
-    window.addEventListener('resize', () => {
-      if(!hero3DCamera || !hero3DRenderer) return;
-      hero3DCamera.aspect = window.innerWidth / window.innerHeight;
-      hero3DCamera.updateProjectionMatrix();
-      hero3DRenderer.setSize(window.innerWidth, window.innerHeight);
-    });
   </script>
 </body>
 </html>
