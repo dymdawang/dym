@@ -190,17 +190,17 @@
     <section id="hero-container" class="relative h-[300vh] bg-transparent">
       <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
         
-        <!-- 【极致精度对齐】底层死锁定格 + 表层0.8秒显现覆盖方案 -->
+        <!-- 【究极版】底层定格 + 钢铁侠六边形鳞片变身转场 -->
         <div id="hero-video-layer" class="absolute inset-0 w-full h-full origin-center flex items-center justify-center bg-[#080b1a]">
           
           <!-- 底层视频：锁定 scale(1.05) -->
           <video id="sci-fi-video" src="https://d8j0ntlcm91z4.cloudfront.net/user_39ca84eAE1ODL9hbR5VhoEj8tBf/hf_20260613_120544_a609e0c2-e52d-4bd5-b10f-b66ac51f1965.mp4" poster="https://placehold.co/1920x1080/080b1a/080b1a.png" muted playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover z-0" style="transform: scale(1.05);"></video>
 
           <!-- 表层定格图 5.jpg：
-               1. 使用 scale(1.085) 精准补偿图片视界差导致的“变小”。
-               2. 使用 translateY(-4.5%) 精准补偿重心的“下坠”。
-               3. 维持 0.8s 干脆显现过渡。 -->
-          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 pointer-events-none" style="transform: scale(1.085) translateY(-4.5%); transition: opacity 0.8s ease-in-out, transform 10s ease-out; object-position: center;">
+               1. 初始化 opacity: 0 彻底隐藏。
+               2. 极其精准的物理对齐：scale(1.10) 补偿体积差，translateY(-6.2%) 暴力托举对齐。
+               3. 将被注入动态 SVG 六边形遮罩执行扩散效果。 -->
+          <img id="hero-final-image" src="./5.jpg" class="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none opacity-0" style="transform: scale(1.10) translateY(-6.2%); transition: transform 10s ease-out; object-position: center;">
           
           <!-- 黑色遮罩层 (z-20) -->
           <div class="absolute inset-0 bg-black/40 z-20 pointer-events-none"></div>
@@ -347,6 +347,72 @@
       </div>
     </div>
   </footer>
+
+  <!-- 钢铁侠六边形转场核心算法 JS -->
+  <script>
+    window.hexPolygons = [];
+    
+    function initHexMask() {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.style.position = "absolute";
+        svg.style.width = "0";
+        svg.style.height = "0";
+
+        const defs = document.createElementNS(svgNS, "defs");
+        const mask = document.createElementNS(svgNS, "mask");
+        mask.setAttribute("id", "hex-mask");
+
+        // 根据屏幕动态计算六边形尺寸，保证鳞片密集度
+        const hexRadius = window.innerWidth < 768 ? 20 : 35; 
+        const hexWidth = hexRadius * 2;
+        const hexHeight = Math.sqrt(3) * hexRadius;
+        
+        // 铺满屏幕
+        const cols = Math.ceil(window.screen.width * 1.5 / (hexWidth * 0.75));
+        const rows = Math.ceil(window.screen.height * 1.5 / hexHeight);
+        
+        // 【核心】定义扩散原点：面部中心 (约 50% 宽, 40% 高)
+        const centerX = window.innerWidth * 0.5;
+        const centerY = window.innerHeight * 0.4;
+
+        const hexGroup = document.createElementNS(svgNS, "g");
+
+        for (let r = -2; r < rows; r++) {
+            for (let c = -2; c < cols; c++) {
+                const x = c * hexWidth * 0.75;
+                const y = r * hexHeight + (c % 2 === 1 ? hexHeight / 2 : 0);
+                
+                const hex = document.createElementNS(svgNS, "polygon");
+                const points = [];
+                for (let i = 0; i < 6; i++) {
+                    const angle_rad = Math.PI / 180 * (60 * i);
+                    points.push(`${x + hexRadius * Math.cos(angle_rad)},${y + hexRadius * Math.sin(angle_rad)}`);
+                }
+                hex.setAttribute("points", points.join(" "));
+                hex.setAttribute("fill", "white");
+                hex.style.opacity = "0"; // 初始状态透明隐藏
+                
+                // 距离算法：决定每个鳞片的点亮延迟
+                const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                const maxDist = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2));
+                
+                // 1200ms 内向外极速扩散，外加极少量的乱序抖动提升科技感
+                const delay = (dist / maxDist) * 1200 + (Math.random() * 150); 
+                
+                hexGroup.appendChild(hex);
+                window.hexPolygons.push({ el: hex, delay: delay });
+            }
+        }
+        mask.appendChild(hexGroup);
+        defs.appendChild(mask);
+        svg.appendChild(defs);
+        document.body.appendChild(svg);
+    }
+    
+    // 页面加载完毕立刻生成底层的遮罩网格待命
+    document.addEventListener("DOMContentLoaded", initHexMask);
+  </script>
 
   <script>
     let isForestPermanentlyHidden = false; 
@@ -696,19 +762,32 @@
       let isVideoEnded = false;
       let videoWeight = 0;
 
-      // 【核心交互交接点】：视频播放完毕，触发底层定格与表层0.8秒极速显现覆盖
+      // 【核心交互交接点】：极客级“钢铁侠鳞片蔓延”触发引擎
       if (sciFiVideo) {
         sciFiVideo.pause();
         sciFiVideo.currentTime = 0;
         sciFiVideo.addEventListener('ended', () => {
           isVideoEnded = true;
           
-          // 表层的 5.jpg 在0.8秒内极速浮现，并触发同步补偿的呼吸放大
           const finalImage = document.getElementById('hero-final-image');
           if (finalImage) {
-             finalImage.style.opacity = 1; 
-             // 终端呼吸感：放大至 1.11，完美维系 -4.5% 的物理补偿落差
-             finalImage.style.transform = "scale(1.11) translateY(-4.5%)";
+             // 1. 瞬间将图片实体的不透明度拉满，但是它被六边形遮罩盖住了，所以还看不见
+             finalImage.style.WebkitMask = "url(#hex-mask)";
+             finalImage.style.mask = "url(#hex-mask)";
+             finalImage.style.opacity = "1";
+             
+             // 2. 引爆 SVG 动态鳞片蔓延效果
+             if (window.hexPolygons) {
+                 window.hexPolygons.forEach(p => {
+                     setTimeout(() => {
+                         p.el.style.transition = "opacity 0.25s ease-in";
+                         p.el.style.opacity = "1";
+                     }, p.delay);
+                 });
+             }
+             
+             // 3. 同步开启 10 秒长效呼吸放大，起始已精准对齐至 1.10 与 -6.2%
+             finalImage.style.transform = "scale(1.13) translateY(-6.2%)";
           }
         });
       }
